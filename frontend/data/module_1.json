@@ -1,0 +1,232 @@
+{
+  "module_id": 1,
+  "slug": "valor-tiempo-y-presupuesto-de-capital",
+  "title": "Valor del Dinero en el Tiempo y Presupuesto de Capital",
+  "subtitle": "Cómo evaluar proyectos reales usando Flujo de Caja Libre (FCFF), VAN y TIR",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Caps. 2, 5 y 6)",
+    "Ross, Westerfield & Jaffe - Finanzas Corporativas (Caps. 4, 5 y 6)",
+    "Berk & DeMarzo - Corporate Finance (Caps. 4, 7 y 8)"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "La función central de un Director de Finanzas (CFO) es asignar capital escaso a activos reales que valgan más de lo que cuestan. Para lograrlo, no alcanza con mirar la ganancia contable del Estado de Resultados: las empresas quiebran por falta de caja, no por falta de utilidad contable. Dominar el valor del dinero en el tiempo y construir correctamente el Flujo de Caja Libre de la Firma (FCFF) te permite traducir cualquier proyecto operativo en dinero equivalente de hoy (VAN) y decidir con rigor si crea o destruye riqueza para los accionistas.",
+    "concepts": [
+      {
+        "title": "Tasas Nominales vs. Efectivas y Descuento",
+        "explanation": "Un dólar hoy vale más que un dólar mañana debido al costo de oportunidad del capital, la inflación y el riesgo. Al evaluar flujos futuros o financiamiento bancario, nunca se deben comparar tasas nominales (TNA) con distinta frecuencia de capitalización: siempre hay que convertirlas a su Tasa Efectiva Anual (TEA) equivalente antes de descontar flujos.",
+        "formula_latex": "TEA = \\left(1 + \\frac{TNA}{m}\\right)^m - 1 \\quad ; \\quad VP = \\sum_{t=1}^{n} \\frac{FC_t}{(1 + r)^t}",
+        "variables_legend": [
+          { "symbol": "TNA", "meaning": "Tasa Nominal Anual pactada" },
+          { "symbol": "m", "meaning": "Cantidad de períodos de capitalización en el año (ej. 12 para mensual)" },
+          { "symbol": "VP", "meaning": "Valor Presente de los flujos futuros" },
+          { "symbol": "r", "meaning": "Tasa de descuento efectiva por período (costo de oportunidad)" }
+        ],
+        "common_pitfall": "Descontar flujos mensuales o trimestrales usando una tasa anual sin convertirla previamente, o usar tasas nominales sin capitalizar."
+      },
+      {
+        "title": "Flujo de Caja Libre de la Firma (FCFF) vs. Utilidad Neta",
+        "explanation": "El FCFF mide la caja pura que genera la operación del negocio disponible para todos los proveedores de capital (acreedores y accionistas), antes de pagar intereses. Parte del EBIT operativo, descuenta impuestos teóricos sobre la operación (NOPAT), suma cargos no erogables como Depreciaciones (D&A) y resta las reinversiones necesarias en activos fijos (Capex) y Capital de Trabajo Neto (ΔNWC).",
+        "formula_latex": "FCFF = EBIT \\times (1 - T) + D\\&A - Capex - \\Delta NWC",
+        "variables_legend": [
+          { "symbol": "EBIT", "meaning": "Resultado operativo antes de intereses e impuestos (EBITDA - D&A)" },
+          { "symbol": "T", "meaning": "Tasa impositiva corporativa (estándar 30%)" },
+          { "symbol": "D&A", "meaning": "Depreciación y Amortización del período" },
+          { "symbol": "Capex", "meaning": "Inversión en bienes de capital (activos fijos)" },
+          { "symbol": "\\Delta NWC", "meaning": "Variación del Capital de Trabajo Neto (si crece, consume caja)" }
+        ],
+        "common_pitfall": "Restar los intereses de la deuda dentro del FCFF. Es un error grave de doble contabilidad, porque el costo del financiamiento ya está incluido en el WACC con el que descontamos el flujo."
+      },
+      {
+        "title": "VAN (NPV) vs. TIR (IRR) en Decisiones de Inversión",
+        "explanation": "El Valor Actual Neto (VAN) mide exactamente cuánta riqueza en moneda de hoy agrega un proyecto por encima de su costo de oportunidad (regla: aceptar si VAN > 0). La Tasa Interna de Retorno (TIR) es la tasa que iguala el VAN a cero. Aunque la TIR es intuitiva en porcentajes, el VAN siempre domina ante proyectos mutuamente excluyentes de distinta escala o flujos no convencionales.",
+        "formula_latex": "VAN = -I_0 + \\sum_{t=1}^{n} \\frac{FCFF_t}{(1 + WACC)^t}",
+        "variables_legend": [
+          { "symbol": "I_0", "meaning": "Desembolso inicial total en t=0 (Capex inicial + NWC inicial)" },
+          { "symbol": "FCFF_t", "meaning": "Flujo de Caja Libre esperado en el período t" },
+          { "symbol": "WACC", "meaning": "Costo de Capital Promedio Ponderado de la firma" }
+        ],
+        "common_pitfall": "Elegir un proyecto pequeño con 40% de TIR por sobre un proyecto grande con 22% de TIR cuando son mutuamente excluyentes, ignorando que el segundo genera mucho mayor VAN absoluto en dólares."
+      },
+      {
+        "title": "Período de Repago (Payback) y sus Limitaciones",
+        "explanation": "El Payback indica en cuántos períodos se recupera la inversión inicial. Sirve como métrica rápida de liquidez o exposición al riesgo en contextos volátiles, pero jamás debe ser el criterio principal de decisión: el Payback simple ignora el valor del dinero en el tiempo y ambos (simple y descontado) ignoran todos los flujos posteriores a la fecha de corte.",
+        "formula_latex": "\\text{Payback Simple} = \\text{Años antes de recuperar } I_0 + \\frac{\\text{Saldo pendiente}}{FCFF_{\\text{año de recupero}}}",
+        "variables_legend": [
+          { "symbol": "I_0", "meaning": "Inversión inicial desembolsada" },
+          { "symbol": "FCFF", "meaning": "Flujo de Caja Libre del período en que se completa el recupero" }
+        ],
+        "common_pitfall": "Rechazar proyectos estratégicos de largo plazo (como infraestructura o software) solo porque tardan más en repagarse que campañas de corto plazo."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Evaluación de Línea de Empaque Automatizada (Horizonte 3 años)",
+      "given_data": [
+        { "label": "Capex inicial (t=0)", "value": "$150.000 (se deprecia linealmente en 3 años: $50.000/año)" },
+        { "label": "Capital de Trabajo inicial (t=0)", "value": "$30.000 (se recupera al 100% al finalizar el año 3)" },
+        { "label": "EBITDA proyectado (Años 1, 2 y 3)", "value": "$120.000 anuales" },
+        { "label": "Tasa impositiva (T)", "value": "30%" },
+        { "label": "Tasa de descuento (WACC anual)", "value": "10%" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Calcular la inversión total inicial en t=0",
+          "calculation": "I_0 = Capex + NWC_0 = 150.000 + 30.000",
+          "result": "-$180.000"
+        },
+        {
+          "step_number": 2,
+          "description": "Calcular EBIT, Impuestos Operativos y NOPAT anual (Años 1 a 3)",
+          "calculation": "EBIT = 120.000 - 50.000 = 70.000 ; NOPAT = 70.000 * (1 - 0,30)",
+          "result": "$49.000 / año"
+        },
+        {
+          "step_number": 3,
+          "description": "Construir el FCFF de los Años 1, 2 y 3 (en Año 3 se recupera el NWC: ΔNWC = -30.000)",
+          "calculation": "FCFF_1,2 = 49.000 + 50.000 = 99.000 ; FCFF_3 = 99.000 - (-30.000)",
+          "result": "Año 1: $99.000 | Año 2: $99.000 | Año 3: $129.000"
+        },
+        {
+          "step_number": 4,
+          "description": "Descontar los flujos al WACC del 10% y sumar sus Valores Presentes",
+          "calculation": "VP = (99.000 / 1,10) + (99.000 / 1,10^2) + (129.000 / 1,10^3) = 90.000 + 81.818,18 + 96.919,61",
+          "result": "$268.737,79"
+        },
+        {
+          "step_number": 5,
+          "description": "Obtener el VAN restando la inversión inicial",
+          "calculation": "VAN = 268.737,79 - 180.000",
+          "result": "+$88.737,79"
+        }
+      ],
+      "final_conclusion": "El proyecto debe APROBARSE. Genera un excedente de $88.737,79 en valor presente neto por encima del retorno mínimo exigido del 10% anual."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m1_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Por qué NO restamos los intereses de la deuda al calcular el Flujo de Caja Libre de la Firma (FCFF)?",
+      "hint": "Pensá en qué representa el denominador (WACC) cuando descontamos el FCFF.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque el FCFF mide la caja generada por los activos operativos antes de pagar a acreedores y accionistas. El costo de los intereses (neto de impuestos) ya está incorporado dentro del WACC. Si restáramos intereses en el numerador y usáramos el WACC en el denominador, castigaríamos dos veces al proyecto por su financiamiento.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 6"
+    },
+    {
+      "card_id": "m1_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "¿Qué supuesto implícito sobre la reinversión de flujos vuelve peligrosa a la TIR frente al VAN en proyectos muy rentables?",
+      "hint": "Compará a qué tasa asume cada método que se reinvierten los flujos intermedios.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "La matemática del VAN asume que los flujos intermedios se reinvierten al costo de oportunidad del capital (WACC), lo cual es realista. La fórmula de la TIR asume implícitamente que los flujos intermedios pueden reinvertirse a la propia TIR (por ejemplo, 45% anual), sobreestimando el atractivo de proyectos de muy corta duración o alta TIR.",
+      "source_reference": "Berk & DeMarzo - Cap. 7"
+    },
+    {
+      "card_id": "m1_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Una empresa crece en ventas y su Capital de Trabajo Neto (NWC) aumenta en $40.000 durante el trimestre (más inventario y cuentas por cobrar). ¿Cómo impacta esto en el FCFF del trimestre?",
+      "hint": "Recordá el signo de ΔNWC en la fórmula del FCFF.",
+      "options": [
+        "A) Aumenta el FCFF en $40.000 porque la empresa tiene más activos corrientes.",
+        "B) Reduce el FCFF en $40.000 porque el aumento de inventarios y cuentas por cobrar inmoviliza caja.",
+        "C) No tiene ningún impacto en el FCFF, ya que solo afecta al Balance General.",
+        "D) Aumenta el NOPAT porque reduce la base imponible del período."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Cuando el Capital de Trabajo Neto aumenta (ΔNWC > 0), la empresa tuvo que financiar stock o crédito a clientes en lugar de retener efectivo. Por eso ΔNWC resta directamente en el cálculo del FCFF (-$40.000). A la inversa, liquidar inventario libera caja y suma al FCFF.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 6"
+    },
+    {
+      "card_id": "m1_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Tenés dos proyectos mutuamente excluyentes para usar un mismo terreno (WACC = 10%). El Proyecto Alfa requiere $100k, tiene TIR = 35% y VAN = +$40k. El Proyecto Beta requiere $500k, tiene TIR = 18% y VAN = +$110k. Si tenés acceso a capital al 10%, ¿qué debe elegir el CFO?",
+      "hint": "El objetivo corporativo es maximizar la riqueza absoluta del accionista, no la tasa porcentual.",
+      "options": [
+        "A) Proyecto Alfa, porque su TIR de 35% duplica prácticamente la de Beta.",
+        "B) Proyecto Alfa, porque al invertir menos capital el período de repago es más corto.",
+        "C) Proyecto Beta, porque genera +$70k adicionales de VAN (riqueza neta hoy) por encima del WACC.",
+        "D) Ninguno, porque la contradicción entre VAN y TIR invalida ambos análisis."
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Ante proyectos mutuamente excluyentes de distinta escala, la TIR favorece artificialmente al proyecto más chico. Como el objetivo financiero es maximizar la creación de valor en dólares de hoy, el VAN es el criterio definitivo: +$110k supera a +$40k.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 5"
+    },
+    {
+      "card_id": "m1_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "El año pasado gastaste $50.000 en un estudio de mercado para lanzar un nuevo producto. Hoy la maquinaria cuesta $200.000 y usarías un galpón propio que actualmente alquilás a un tercero por $20.000 anuales libres de impuestos. ¿Cómo tratás ambos conceptos al armar el flujo del proyecto?",
+      "hint": "Diferenciá entre costos hundidos (irreversibles) y costos de oportunidad.",
+      "options": [
+        "A) Incluís los $50.000 como inversión inicial y omitís el alquiler porque el galpón ya es tuyo.",
+        "B) Ignorás los $50.000 (costo hundido) e incluís los -$20.000 anuales como costo de oportunidad.",
+        "C) Incluís tanto los $50.000 como los $20.000 anuales como egresos operativos.",
+        "D) Ignorás ambos porque ninguno representa un pago nuevo en efectivo a proveedores."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Los $50.000 ya se gastaron el año pasado se haga o no el proyecto: son un costo hundido (sunk cost) y nunca entran al flujo incremental. En cambio, dejar de cobrar $20.000 por usar el galpón propio es un costo de oportunidad real que debe restarse de los flujos anuales.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 6"
+    },
+    {
+      "card_id": "m1_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Un banco ofrece financiar capital de trabajo con una Tasa Nominal Anual (TNA) del 24% con capitalización mensual (m = 12). ¿Cuál es la Tasa Efectiva Anual (TEA) real que soporta la empresa?",
+      "hint": "Calculá la tasa mensual (24% / 12) y capitalizala por 12 períodos.",
+      "options": [
+        "A) 24,00%",
+        "B) 25,44%",
+        "C) 26,82%",
+        "D) 28,80%"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "La tasa mensual efectiva es 24% / 12 = 2% (0,02). Aplicando la fórmula TEA = (1 + 0,02)^12 - 1 = 1,26824 - 1 = 26,82%. Usar el 24% nominal subestimaría el costo financiero real en casi 3 puntos porcentuales.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 4"
+    },
+    {
+      "card_id": "m1_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "En el trimestre, tu empresa registró EBITDA = $100.000, Depreciaciones (D&A) = $20.000, Capex = $35.000 y un aumento del Capital de Trabajo (ΔNWC) de +$10.000. Con una tasa impositiva T = 30%, ¿cuál fue el FCFF trimestral?",
+      "hint": "Calculá primero EBIT = EBITDA - D&A, luego NOPAT = EBIT*(1-T), y aplicá la fórmula completa.",
+      "options": [
+        "A) $31.000",
+        "B) $11.000",
+        "C) $51.000",
+        "D) $55.000"
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Paso 1: EBIT = 100.000 - 20.000 = $80.000. Paso 2: NOPAT = 80.000 * (1 - 0,30) = $56.000. Paso 3: FCFF = NOPAT ($56.000) + D&A ($20.000) - Capex ($35.000) - ΔNWC ($10.000) = $31.000.",
+      "source_reference": "Damodaran - Applied Corporate Finance"
+    },
+    {
+      "card_id": "m1_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Evaluás adquirir una licencia perpetua que exige invertir $500.000 hoy (t=0). Se estima que generará un FCFF de $75.000 al final del Año 1, creciendo al g = 2% anual a perpetuidad. Si el WACC de la firma es 12%, ¿cuál es el VAN del proyecto?",
+      "hint": "Usá la fórmula de perpetuidad creciente: VP = FCFF_1 / (WACC - g), y luego restá la inversión inicial.",
+      "options": [
+        "A) +$125.000",
+        "B) +$250.000",
+        "C) +$265.000",
+        "D) +$35.714"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Como los $75.000 ya están expresados al final del Año 1 (FCFF_1), el valor presente de la perpetuidad creciente es VP = 75.000 / (0,12 - 0,02) = 75.000 / 0,10 = $750.000. Restando la inversión inicial de $500.000, el VAN es +$250.000.",
+      "source_reference": "Berk & DeMarzo - Cap. 4"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_1",
+    "case_title": "Expansión Industrial bajo Restricción de Capital",
+    "company_name": "Metalúrgica Austral S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Durante 3 trimestres deberás seleccionar proyectos de Capex evaluando su VAN, TIR y consumo de Capital de Trabajo. Tu objetivo es maximizar el Flujo de Caja Libre acumulado sin que la caja caiga por debajo de cero."
+  }
+}

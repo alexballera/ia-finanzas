@@ -1,0 +1,232 @@
+{
+  "module_id": 2,
+  "slug": "riesgo-retorno-y-costo-de-capital",
+  "title": "Riesgo, Retorno y Costo de Capital",
+  "subtitle": "Cómo determinar la tasa de corte (WACC) integrando CAPM, Hamada y riesgo crediticio",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Caps. 7, 8, 9 y 19)",
+    "Damodaran - Applied Corporate Finance (Caps. 3 y 4)",
+    "Ross, Westerfield & Jaffe - Finanzas Corporativas (Caps. 11 y 13)",
+    "Berk & DeMarzo - Corporate Finance (Caps. 10, 12 y 14)"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "Descontar un flujo de caja con la tasa equivocada es tan peligroso como proyectar mal las ventas: una tasa de descuento subestimada lleva a aprobar proyectos que destruyen valor, mientras que una sobreestimada paraliza el crecimiento rentable. El Costo de Capital Promedio Ponderado (WACC) representa el retorno mínimo exigido por todos los proveedores de fondos de la empresa (acreedores y accionistas) según el riesgo sistemático del negocio y su nivel de endeudamiento.",
+    "concepts": [
+      {
+        "title": "Riesgo Sistemático vs. No Sistemático y el Modelo CAPM",
+        "explanation": "Los inversores pueden eliminar gratis el riesgo específico de una empresa (como una huelga local o la salida de un gerente) diversificando su portafolio. Por eso, el mercado solo premia con mayor retorno esperado el riesgo sistemático o macroeconómico no diversificable, medido por la Beta (β). El CAPM traduce esa Beta en el costo exigido por los accionistas (Ke).",
+        "formula_latex": "K_e = R_f + \\beta_L \\times ERP",
+        "variables_legend": [
+          { "symbol": "K_e", "meaning": "Costo del capital propio o retorno exigido por el accionista" },
+          { "symbol": "R_f", "meaning": "Tasa libre de riesgo (ej. rendimiento del bono del Tesoro)" },
+          { "symbol": "\\beta_L", "meaning": "Beta apalancada de la acción (sensibilidad al mercado)" },
+          { "symbol": "ERP", "meaning": "Prima de Riesgo de Mercado (Market Risk Premium: E(Rm) - Rf)" }
+        ],
+        "common_pitfall": "Sumar primas arbitrarias de 'riesgo específico' al CAPM por problemas operativos internos que un inversor diversificado puede mitigar."
+      },
+      {
+        "title": "Beta Desapalancada vs. Apalancada (Ecuación de Hamada)",
+        "explanation": "La Beta observada en bolsa mezcla dos riesgos: el riesgo operativo del sector (Beta desapalancada, βu) y el riesgo financiero por tener deuda (apalancamiento). Al tomar deuda, los acreedores tienen cobro prioritario y fijo; toda la volatilidad del negocio recae sobre una porción más chica de Equity, elevando su Beta (βL) aunque la operación siga siendo la misma.",
+        "formula_latex": "\\beta_L = \\beta_u \\times \\left[1 + (1 - T) \\times \\frac{D}{E}\\right]",
+        "variables_legend": [
+          { "symbol": "\\beta_u", "meaning": "Beta desapalancada (riesgo puro del negocio sin deuda)" },
+          { "symbol": "T", "meaning": "Tasa impositiva corporativa (estándar 30%)" },
+          { "symbol": "D / E", "meaning": "Ratio Deuda Total sobre Patrimonio Neto (Equity)" }
+        ],
+        "common_pitfall": "Usar la Beta de una empresa comparable muy endeudada para evaluar un proyecto sin deuda, sin haber 'desapalancado' primero su Beta."
+      },
+      {
+        "title": "Costo de la Deuda (Kd), Escudo Fiscal y Rating Sintético",
+        "explanation": "El costo de la deuda antes de impuestos surge de sumar a la tasa libre de riesgo un Spread crediticio acorde a la solvencia de la empresa. Siguiendo el enfoque de Rating Sintético de Damodaran, cuanto menor sea la Cobertura de Intereses (EBIT / Intereses), mayor será el spread exigido por los bancos. Como los intereses son deducibles de impuestos, el costo neto para la firma se reduce por (1 - T).",
+        "formula_latex": "K_{d,\\text{neto}} = (R_f + \\text{Spread Crediticio}) \\times (1 - T)",
+        "variables_legend": [
+          { "symbol": "\\text{Spread}", "meaning": "Sobretasa por riesgo de default según cobertura de intereses" },
+          { "symbol": "K_{d,\\text{neto}}", "meaning": "Costo efectivo de la deuda después del escudo fiscal" },
+          { "symbol": "1 - T", "meaning": "Factor de ahorro impositivo por deducibilidad de intereses" }
+        ],
+        "common_pitfall": "Tomar como Kd la tasa histórica de un préstamo viejo en lugar del costo marginal de endeudarse hoy a las tasas y riesgo actuales, u olvidar multiplicarlo por (1 - T)."
+      },
+      {
+        "title": "El WACC como Tasa de Corte (Hurdle Rate)",
+        "explanation": "El WACC pondera el costo del Equity (Ke) y el costo neto de la Deuda (Kd neto) por el peso de cada fuente en la estructura de capital. Funciona como la valla mínima de rentabilidad: un proyecto solo crea valor si su retorno supera al WACC. Sin embargo, cada proyecto debe evaluarse con el WACC acorde a su propio riesgo operativo, no necesariamente el de la casa matriz.",
+        "formula_latex": "WACC = K_e \\cdot \\left(\\frac{E}{D + E}\\right) + K_{d,\\text{neto}} \\cdot \\left(\\frac{D}{D + E}\\right)",
+        "variables_legend": [
+          { "symbol": "E / (D+E)", "meaning": "Proporción de financiamiento con capital propio" },
+          { "symbol": "D / (D+E)", "meaning": "Proporción de financiamiento con deuda financiera" }
+        ],
+        "common_pitfall": "Usar valores contables históricos distorsionados en vez de valores de mercado (o estructura objetivo) para ponderar Deuda y Equity."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Cálculo del WACC para Nueva Unidad Logística — Andina Logística S.A.",
+      "given_data": [
+        { "label": "Tasa libre de riesgo (Rf)", "value": "4,0%" },
+        { "label": "Prima de riesgo de mercado (ERP)", "value": "5,0%" },
+        { "label": "Beta desapalancada del sector (βu)", "value": "1,00" },
+        { "label": "Estructura de capital objetivo", "value": "Deuda (D) = $300.000 | Equity (E) = $500.000 (Total V = $800.000)" },
+        { "label": "Cobertura de intereses (EBIT / Intereses)", "value": "3,8x (Calificación BBB -> Spread crediticio = +3,0%)" },
+        { "label": "Tasa impositiva (T)", "value": "30%" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Calcular la relación D/E y los ponderadores de la estructura de capital",
+          "calculation": "D/E = 300.000 / 500.000 = 0,60 ; Wd = 300.000 / 800.000 = 37,5% ; We = 500.000 / 800.000 = 62,5%",
+          "result": "D/E = 0,60 | Peso Deuda = 37,5% | Peso Equity = 62,5%"
+        },
+        {
+          "step_number": 2,
+          "description": "Apalancar la Beta operativa usando la fórmula de Hamada",
+          "calculation": "βL = 1,00 * [1 + (1 - 0,30) * 0,60] = 1,00 * [1 + 0,42]",
+          "result": "βL = 1,42"
+        },
+        {
+          "step_number": 3,
+          "description": "Calcular el Costo del Equity (Ke) mediante el modelo CAPM",
+          "calculation": "Ke = 4,0% + (1,42 * 5,0%) = 4,0% + 7,10%",
+          "result": "Ke = 11,10%"
+        },
+        {
+          "step_number": 4,
+          "description": "Determinar el Costo de la Deuda después de impuestos (Kd neto)",
+          "calculation": "Kd_pre = 4,0% + 3,0% = 7,00% ; Kd_neto = 7,00% * (1 - 0,30)",
+          "result": "Kd neto = 4,90%"
+        },
+        {
+          "step_number": 5,
+          "description": "Ponderar Ke y Kd neto para obtener el WACC anual",
+          "calculation": "WACC = (11,10% * 0,625) + (4,90% * 0,375) = 6,9375% + 1,8375%",
+          "result": "WACC = 8,775% (8,78%)"
+        }
+      ],
+      "final_conclusion": "La tasa mínima de corte para la nueva unidad es 8,78% anual. Cualquier inversión logística en este perfil de riesgo deberá rendir por encima del 8,78% para crear valor neto para los accionistas."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m2_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Por qué el CAPM NO remunera al inversor por el riesgo específico (no sistemático) de una compañía?",
+      "hint": "Pensá en qué puede hacer un accionista al armar su portafolio en el mercado de capitales.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque el riesgo específico (ej. falla en una planta, juicio puntual) puede eliminarse prácticamente sin costo mediante la diversificación en un portafolio amplio de acciones. Como el mercado no paga por un riesgo que el inversor puede evitar por su cuenta, el CAPM solo exige prima por el riesgo sistemático (Beta).",
+      "source_reference": "Brealey, Myers & Allen - Cap. 7 y 8"
+    },
+    {
+      "card_id": "m2_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Si una empresa mantiene intactos sus activos operativos pero emite deuda para recomprar acciones, ¿por qué sube automáticamente su Beta apalancada (βL)?",
+      "hint": "Pensá en quién absorbe las fluctuaciones del EBIT cuando hay pagos fijos de intereses.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque los acreedores cobran un interés fijo prioritario. Toda la variabilidad operativa del EBIT se concentra sobre una base patrimonial (Equity) más reducida, amplificando la volatilidad de los retornos para el accionista. Mayor apalancamiento financiero equivale siempre a mayor βL y mayor Ke.",
+      "source_reference": "Berk & DeMarzo - Cap. 14"
+    },
+    {
+      "card_id": "m2_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Una empresa eléctrica regulada muy estable (WACC = 7%) evalúa invertir en una startup de biotecnología cuyo riesgo sectorial exige un WACC del 15%. ¿Qué tasa de descuento debe usar el CFO para calcular el VAN del proyecto biotecnológico?",
+      "hint": "La tasa de corte depende del uso de los fondos (riesgo del proyecto), no de la fuente histórica de la empresa.",
+      "options": [
+        "A) 7%, porque ese es el costo real al que la empresa eléctrica consigue financiamiento hoy.",
+        "B) 11%, como promedio ponderado entre el negocio eléctrico y el biotecnológico.",
+        "C) 15%, porque la tasa de descuento debe reflejar el riesgo sistemático específico del proyecto evaluado.",
+        "D) 7% reducido por el escudo fiscal si la matriz financia la compra 100% con deuda corporativa."
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Es una de las falacias más comunes en presupuesto de capital: usar el WACC corporativo para proyectos de distinto riesgo. El costo de capital pertenece al activo/proyecto que se evalúa, no a la empresa que lo compra. Descontar biotecnología al 7% llevaría a aprobar proyectos destructores de valor.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 9"
+    },
+    {
+      "card_id": "m2_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "El Banco Central sube la tasa libre de riesgo (Rf) en +200 puntos básicos y, al mismo tiempo, la caída de ventas reduce tu cobertura de intereses de 4,5x a 1,8x (bajando tu rating sintético a BB). ¿Qué ocurre con el WACC de la firma?",
+      "hint": "Analizá el impacto simultáneo sobre Ke y sobre el costo marginal de la deuda Kd.",
+      "options": [
+        "A) Solo sube Ke, porque Kd queda congelado a la tasa histórica de los balances pasados.",
+        "B) El WACC cae porque el mayor gasto en intereses genera un escudo fiscal más grande.",
+        "C) El WACC permanece neutro porque la suba de Rf compensa el deterioro crediticio.",
+        "D) Suben tanto Ke como el Kd marginal (por mayor Rf y mayor spread), elevando el WACC y tornando negativos los VAN de proyectos marginales."
+      ],
+      "correct_option_index": 3,
+      "back_explanation": "El aumento de Rf empuja hacia arriba el piso tanto del CAPM (Ke) como de la deuda (Kd). Además, al caer la cobertura a 1,8x, el spread crediticio salta por riesgo de insolvencia. El WACC sube fuertemente, elevando la valla mínima de rentabilidad.",
+      "source_reference": "Damodaran - Applied Corporate Finance (Cap. 4)"
+    },
+    {
+      "card_id": "m2_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "¿Por qué la literatura financiera recomienda ponderar D y E en el WACC usando valores de mercado (o estructura objetivo) en lugar de valores contables históricos del Balance?",
+      "hint": "Pensá si el costo de oportunidad del capital mira hacia atrás o hacia adelante.",
+      "options": [
+        "A) Porque el WACC mide el costo de oportunidad actual de levantar nuevo capital a precios vigentes, no saldos contables históricos.",
+        "B) Porque los valores contables siempre subestiman el monto nominal de la deuda bancaria.",
+        "C) Porque el Patrimonio Neto contable no contempla el pago de impuestos corporativos.",
+        "D) Porque en la ecuación de Hamada la Beta solo puede multiplicarse por valores contables negativos."
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Un inversor que compra acciones hoy paga el precio de mercado y exige el retorno Ke sobre ese valor de mercado, no sobre el valor libro original de emisión. Por ello, los pesos D/(D+E) y E/(D+E) deben reflejar valores de mercado o la estructura objetivo de largo plazo.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 13"
+    },
+    {
+      "card_id": "m2_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Un sector industrial tiene una Beta desapalancada (βu) de 0,80. Si una empresa de ese sector opera con una relación Deuda/Equity (D/E) de 0,50 y la tasa impositiva T es 30%, ¿cuál es su Beta apalancada (βL) según Hamada?",
+      "hint": "Aplicá βL = βu * [1 + (1 - T) * (D/E)].",
+      "options": [
+        "A) 0,92",
+        "B) 1,20",
+        "C) 1,08",
+        "D) 0,59"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "βL = 0,80 * [1 + (1 - 0,30) * 0,50] = 0,80 * [1 + 0,70 * 0,50] = 0,80 * 1,35 = 1,08. Olvidar el escudo fiscal (1 - T) habría dado erróneamente 1,20.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 13"
+    },
+    {
+      "card_id": "m2_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Calculá el WACC con estos datos: Rf = 5,0%, ERP = 6,0%, βL = 1,25, costo de deuda antes de impuestos Kd = 8,0%, tasa impositiva T = 30%. La firma se financia 40% con Deuda y 60% con Equity.",
+      "hint": "Calculá primero Ke por CAPM, luego Kd neto multiplicado por (1 - T), y finalmente ponderá 60% / 40%.",
+      "options": [
+        "A) 8,36%",
+        "B) 9,74%",
+        "C) 10,70%",
+        "D) 8,84%"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Paso 1: Ke = 5,0% + (1,25 * 6,0%) = 12,50%. Paso 2: Kd neto = 8,0% * (1 - 0,30) = 5,60%. Paso 3: WACC = (12,50% * 0,60) + (5,60% * 0,40) = 7,50% + 2,24% = 9,74%.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 19"
+    },
+    {
+      "card_id": "m2_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Una compañía tiene Rf = 4,5%, Ke = 12,0% (fijo), T = 30% y se financia 20% con Deuda y 80% con Equity. Tras una caída del EBIT a $75.000 frente a intereses de $30.000, su cobertura baja a 2,5x, pasando a un spread crediticio BB de +5,5%. ¿Cuál es su nuevo WACC?",
+      "hint": "Calculá primero el Kd pre-impuestos sumando Rf + Spread BB, aplicá el escudo fiscal (1-T) y ponderá en el WACC.",
+      "options": [
+        "A) 11,00%",
+        "B) 10,44%",
+        "C) 11,60%",
+        "D) 9,50%"
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Con cobertura de 2,5x, el nuevo Kd pre-impuestos es Rf (4,5%) + Spread BB (5,5%) = 10,0%. Después de impuestos: Kd neto = 10,0% * (1 - 0,30) = 7,00%. Ponderando en la estructura: WACC = (12,0% * 0,80) + (7,00% * 0,20) = 9,60% + 1,40% = 11,00%.",
+      "source_reference": "Damodaran - Applied Corporate Finance"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_2",
+    "case_title": "Tormenta de Tasas y Defensa del Hurdle Rate",
+    "company_name": "Energía Pampeana S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Durante 3 trimestres enfrentarás una suba abrupta de la tasa libre de riesgo (Rf) y presión sobre tu cobertura de intereses. Deberás recalcular el impacto sobre tu WACC y evitar aprobar inversiones cuyo VAN se vuelva negativo tras el encarecimiento del capital."
+  }
+}

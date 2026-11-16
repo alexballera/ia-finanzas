@@ -1,0 +1,232 @@
+{
+  "module_id": 3,
+  "slug": "estructura-de-capital-y-creacion-de-valor",
+  "title": "Estructura de Capital y Creación de Valor (EVA)",
+  "subtitle": "Apalancamiento, Modigliani-Miller, escudo fiscal, costos de insolvencia y ROIC vs. WACC",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Caps. 17 y 18)",
+    "McKinsey & Company - Valuation: Measuring and Managing the Value of Companies (Caps. 3 y 7)",
+    "Ross, Westerfield & Jaffe - Finanzas Corporativas (Caps. 16 y 17)",
+    "Berk & DeMarzo - Corporate Finance (Caps. 14, 15 y 16)"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "Muchos ejecutivos celebran cuando la facturación o el EBITDA crecen, sin advertir que pueden estar destruyendo riqueza para los accionistas si el capital invertido rinde menos que su WACC. Al mismo tiempo, endeudarse reduce impuestos gracias al escudo fiscal, pero llevar el apalancamiento al extremo dispara el costo de la deuda y el riesgo de insolvencia. En este módulo cerramos el círculo de las Finanzas Corporativas: cómo optimizar la mezcla Deuda/Equity y medir la verdadera creación de valor económico (EVA).",
+    "concepts": [
+      {
+        "title": "Proposiciones de Modigliani-Miller (Sin y Con Impuestos)",
+        "explanation": "En un mercado perfecto sin impuestos ni fricciones, Modigliani y Miller (MM) demostraron que la estructura de capital es irrelevante: el valor de la empresa depende de los flujos de sus activos reales, no de cómo se reparten entre deuda y acciones (la analogía de cortar la misma pizza en distintas porciones). Sin embargo, al incorporar impuestos corporativos (T), los intereses deducibles crean un Escudo Fiscal que aumenta el valor de la firma apalancada.",
+        "formula_latex": "V_L = V_U + VP(\\text{Escudo Fiscal}) \\quad ; \\quad \\text{Con deuda perpetua: } V_L = V_U + (T \\times D)",
+        "variables_legend": [
+          { "symbol": "V_L", "meaning": "Valor de la empresa apalancada (con deuda)" },
+          { "symbol": "V_U", "meaning": "Valor de la empresa sin deuda (100% Equity)" },
+          { "symbol": "T \\times D", "meaning": "Valor presente del escudo fiscal ante deuda permanente (T = tasa impositiva, D = deuda)" }
+        ],
+        "common_pitfall": "Creer que por existir el escudo fiscal la empresa debe financiarse al 99% con deuda, ignorando las fricciones del mundo real."
+      },
+      {
+        "title": "Teoría del Trade-Off Estático: Escudo Fiscal vs. Insolvencia",
+        "explanation": "En la práctica, el endeudamiento tiene un límite óptimo. A medida que cae la cobertura de intereses (EBIT / Intereses), aumentan los costos directos e indirectos de estrés financiero: tasas bancarias punitivas (spread BB/CCC), proveedores que exigen pago contado, pérdida de clientes y subinversión en proyectos rentables (debt overhang). El CFO busca equilibrar el beneficio marginal del escudo fiscal con el costo esperado de insolvencia.",
+        "formula_latex": "V_L = V_U + VP(\\text{Escudo Fiscal}) - VP(\\text{Costos de Insolvencia})",
+        "variables_legend": [
+          { "symbol": "\\text{Escudo Fiscal}", "meaning": "Ahorro impositivo por deducción de intereses financieros" },
+          { "symbol": "\\text{Costos de Insolvencia}", "meaning": "Pérdida de valor operativo, honorarios legales y sobreprecio financiero ante alto riesgo de default" }
+        ],
+        "common_pitfall": "Subestimar los costos indirectos del estrés financiero: mucho antes de entrar en quiebra formal, una firma sobre-endeudada pierde talento clave, crédito comercial y cuota de mercado."
+      },
+      {
+        "title": "Capital Invertido Operativo (IC) y ROIC (Enfoque McKinsey)",
+        "explanation": "El Retorno sobre el Capital Invertido (ROIC) mide la rentabilidad pura de la operación, aislando el efecto del endeudamiento. Siguiendo el criterio de McKinsey, el Capital Invertido Operativo incluye el Capital de Trabajo Neto (NWC) y los Activos Fijos Netos (PP&E), excluyendo la caja ociosa en bancos. Si la empresa opera con ciclos trimestrales, el NOPAT trimestral se multiplica por 4 para comparar el ROIC anualizado frente al WACC anual.",
+        "formula_latex": "IC = NWC + PP\\&E \\quad ; \\quad ROIC_{\\text{anualizado}} = \\frac{NOPAT_{\\text{trimestral}} \\times 4}{IC}",
+        "variables_legend": [
+          { "symbol": "IC", "meaning": "Capital Invertido Operativo (excluye caja ociosa)" },
+          { "symbol": "NWC", "meaning": "Capital de Trabajo Neto operativo" },
+          { "symbol": "PP\\&E", "meaning": "Activos Fijos Netos (Propiedad, Planta y Equipo)" },
+          { "symbol": "NOPAT", "meaning": "Utilidad operativa después de impuestos teóricos: EBIT * (1 - T)" }
+        ],
+        "common_pitfall": "Usar el ROE (Return on Equity) como métrica de desempeño operativo: el ROE puede subir artificialmente tomando más deuda barata aunque la operación sea mediocre, ocultando el riesgo financiero."
+      },
+      {
+        "title": "Valor Económico Agregado (EVA) y la Trampa del Crecimiento",
+        "explanation": "El EVA mide la ganancia económica real luego de descontar el costo de oportunidad de todo el capital empleado (tanto deuda como equity). Crecer en ventas o EBITDA solo crea riqueza si ROIC > WACC. Si ROIC < WACC, expandir la empresa acelera la destrucción de valor. Lograr un EVA positivo y sostenido con solvencia es el verdadero indicador de haber salido de la 'carrera de la rata operativa'.",
+        "formula_latex": "EVA_{\\text{anualizado}} = (ROIC_{\\text{anualizado}} - WACC) \\times IC = NOPAT_{\\text{anual}} - (WACC \\times IC)",
+        "variables_legend": [
+          { "symbol": "ROIC - WACC", "meaning": "Spread de creación de valor (si es positivo, cada dólar invertido vale más de lo que cuesta)" },
+          { "symbol": "WACC \\times IC", "meaning": "Cargo financiero anual por el capital inmovilizado en la operación" }
+        ],
+        "common_pitfall": "Aprobar inversiones por el solo hecho de que 'dan ganancia neta positiva' en el Estado de Resultados, olvidando que la utilidad contable no resta el costo del capital propio (Ke)."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Auditoría de Creación de Valor (ROIC vs. WACC) — TecnoSur Manufactura S.A.",
+      "given_data": [
+        { "label": "EBITDA trimestral", "value": "$150.000" },
+        { "label": "Depreciaciones (D&A) trimestrales", "value": "$30.000" },
+        { "label": "Tasa impositiva corporativa (T)", "value": "30%" },
+        { "label": "Capital de Trabajo Neto (NWC)", "value": "$600.000" },
+        { "label": "Activos Fijos Netos (PP&E)", "value": "$2.400.000" },
+        { "label": "Caja ociosa en banco", "value": "$250.000 (no operativa)" },
+        { "label": "WACC anual actual", "value": "12,0%" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Calcular EBIT y NOPAT trimestral",
+          "calculation": "EBIT_q = 150.000 - 30.000 = 120.000 ; NOPAT_q = 120.000 * (1 - 0,30)",
+          "result": "$84.000 / trimestre"
+        },
+        {
+          "step_number": 2,
+          "description": "Anualizar el NOPAT para hacerlo comparable con el WACC anual",
+          "calculation": "NOPAT_anual = 84.000 * 4",
+          "result": "$336.000 / año"
+        },
+        {
+          "step_number": 3,
+          "description": "Calcular el Capital Invertido Operativo (IC) bajo criterio McKinsey (excluyendo caja ociosa)",
+          "calculation": "IC = NWC + PP&E = 600.000 + 2.400.000",
+          "result": "$3.000.000"
+        },
+        {
+          "step_number": 4,
+          "description": "Determinar el ROIC anualizado",
+          "calculation": "ROIC = 336.000 / 3.000.000",
+          "result": "11,20% anual"
+        },
+        {
+          "step_number": 5,
+          "description": "Calcular el EVA anualizado comparando ROIC frente al WACC del 12,0%",
+          "calculation": "EVA = (11,20% - 12,00%) * 3.000.000 = (-0,80%) * 3.000.000",
+          "result": "-$24.000 / año (Destrucción de valor)"
+        }
+      ],
+      "final_conclusion": "Aunque la empresa reporta un sólido EBITDA de $150.000 trimestrales, su ROIC (11,20%) está por debajo de su WACC (12,00%), destruyendo $24.000 anuales de valor económico. El CFO debe mejorar márgenes operativos, reducir NWC inmovilizado o bajar el WACC antes de seguir expandiendo activos."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m3_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Qué establece la Proposición I de Modigliani-Miller en un mundo sin impuestos ni costos de fricción?",
+      "hint": "Recordá la famosa metáfora de la pizza dividida en porciones.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Establece que el valor total de la empresa (V = D + E) es completamente independiente de su estructura de capital. La creación de valor ocurre del lado izquierdo del Balance (flujos generados por los activos reales). Cambiar la proporción de deuda y acciones del lado derecho solo redistribuye el riesgo y el flujo entre acreedores y accionistas, sin agrandar el tamaño total de la pizza.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 17"
+    },
+    {
+      "card_id": "m3_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "¿Por qué una empresa puede mostrar un ROE (Return on Equity) creciente y aun así estar destruyendo valor económico (EVA negativo)?",
+      "hint": "Pensá en la diferencia entre rentabilidad operativa pura (ROIC) y el efecto del apalancamiento sobre el Patrimonio Neto.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque el ROE depende tanto del desempeño operativo como de la deuda: si la empresa reemplaza Equity por deuda barata, el denominador (Equity) se achica y el ROE sube mientras ROIC > Kd neto. Sin embargo, el apalancamiento eleva la Beta y el costo exigido por el accionista (Ke). Si el ROIC operativo queda por debajo del WACC total, el EVA es negativo pese a un ROE aparentemente atractivo.",
+      "source_reference": "McKinsey & Company - Valuation (Cap. 7)"
+    },
+    {
+      "card_id": "m3_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Según la Teoría del Trade-Off Estático, si los intereses de la deuda generan un valioso escudo fiscal, ¿por qué las empresas rentables no se financian con un 99% de deuda?",
+      "hint": "Analizá qué ocurre del lado negativo del apalancamiento cuando cae la cobertura de intereses.",
+      "options": [
+        "A) Porque las normas contables prohíben tener más deuda que patrimonio neto.",
+        "B) Porque a partir de cierto nivel de deuda, los costos esperados de estrés financiero e insolvencia superan el beneficio marginal del escudo fiscal.",
+        "C) Porque al superar el 50% de deuda la tasa impositiva corporativa T cae automáticamente a 0%.",
+        "D) Porque Modigliani-Miller demostraron que la deuda siempre destruye valor incluso con impuestos."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "A medida que crece la deuda, sube la probabilidad de incumplimiento. Los costos esperados de insolvencia (spreads bancarios punitivos, fuga de clientes, restricciones de proveedores y costos legales) terminan superando el ahorro impositivo adicional, definiendo un nivel óptimo de endeudamiento.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 17"
+    },
+    {
+      "card_id": "m3_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Una unidad de negocio tiene un ROIC del 10% mientras el WACC de la firma es del 13%. Su gerente propone duplicar la capacidad instalada para duplicar ventas y EBITDA, manteniendo exactamente ese 10% de ROIC. ¿Qué sucede con el EVA total si el CFO aprueba la expansión?",
+      "hint": "Evaluá si cada nuevo dólar invertido rinde más o menos que su costo de capital.",
+      "options": [
+        "A) El EVA mejora porque al duplicar el EBITDA se diluyen los gastos financieros fijos.",
+        "B) El EVA se mantiene igual porque el porcentaje de ROIC no cambió.",
+        "C) El EVA empeora (destruye más valor), porque invertir más capital al 10% cuando el dinero cuesta 13% pierde 3% anual por cada dólar nuevo.",
+        "D) El EVA pasa a ser positivo siempre que la utilidad neta contable de la división sea mayor a cero."
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Es la trampa clásica del crecimiento sin rentabilidad: crecer cuando ROIC < WACC amplifica la destrucción de valor. Al duplicar el Capital Invertido con un spread negativo de -3% (10% - 13%), la pérdida económica anual se duplica.",
+      "source_reference": "McKinsey & Company - Valuation (Cap. 3)"
+    },
+    {
+      "card_id": "m3_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "¿En qué consiste el problema de 'Debt Overhang' (subinversión por sobre-endeudamiento) cuando una empresa atraviesa estrés financiero severo?",
+      "hint": "Pensá en el conflicto de incentivos entre accionistas y acreedores si se requiere inyectar nuevo Equity.",
+      "options": [
+        "A) Los accionistas rechazan financiar incluso proyectos con VAN positivo porque gran parte del valor generado irá a rescatar primero a los acreedores existentes.",
+        "B) Los bancos obligan al directorio a repartir dividendos extraordinarios en efectivo.",
+        "C) Las depreciaciones contables superan al EBITDA, reduciendo artificialmente los impuestos.",
+        "D) El WACC de la empresa cae hasta igualarse con la tasa libre de riesgo."
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Cuando la deuda es muy alta y riesgosa, si los accionistas ponen capital nuevo para un proyecto rentable (VAN > 0), los acreedores capturan primero los flujos para asegurar el cobro de sus bonos/préstamos. Al no quedarse con el beneficio neto, los accionistas prefieren no invertir, destruyendo valor total de la firma.",
+      "source_reference": "Berk & DeMarzo - Cap. 16"
+    },
+    {
+      "card_id": "m3_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Una empresa sin deuda tiene un valor de mercado Vu = $10.000.000. Decide emitir $2.000.000 de deuda perpetua al 8% anual para recomprar acciones. Bajo el modelo puro de Modigliani-Miller con impuestos (T = 30%, sin costos de insolvencia), ¿cuál es el nuevo valor de la firma apalancada (VL)?",
+      "hint": "Usá VL = Vu + (T * D).",
+      "options": [
+        "A) $10.048.000",
+        "B) $12.000.000",
+        "C) $9.400.000",
+        "D) $10.600.000"
+      ],
+      "correct_option_index": 3,
+      "back_explanation": "Con deuda perpetua y sin costos de insolvencia, el valor presente del escudo fiscal es T * D = 0,30 * $2.000.000 = $600.000. Por lo tanto, VL = $10.000.000 + $600.000 = $10.600.000.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 18"
+    },
+    {
+      "card_id": "m3_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Una empresa reporta: Caja = $150.000, Capital de Trabajo Neto (NWC) = $400.000, Activos Fijos Netos (PP&E) = $1.600.000, Deuda Total = $800.000 y NOPAT trimestral = $75.000. Siguiendo el criterio operativo de McKinsey (excluyendo caja ociosa), ¿cuál es su ROIC anualizado?",
+      "hint": "Calculá IC = NWC + PP&E, anualizá el NOPAT multiplicando por 4 y dividí ambos.",
+      "options": [
+        "A) 3,75%",
+        "B) 15,00%",
+        "C) 13,95%",
+        "D) 18,75%"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Paso 1: Capital Invertido Operativo IC = NWC ($400.000) + PP&E ($1.600.000) = $2.000.000 (la caja de $150.000 se excluye). Paso 2: NOPAT anualizado = $75.000 * 4 = $300.000. Paso 3: ROIC = $300.000 / $2.000.000 = 15,00%.",
+      "source_reference": "McKinsey & Company - Valuation"
+    },
+    {
+      "card_id": "m3_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Actualmente tu empresa tiene IC = $4.000.000, NOPAT anual = $440.000 (ROIC = 11,0%) y WACC = 10,0%. Mediante mejor gestión de inventarios liberás $500.000 de Capital de Trabajo sin perder ventas (NOPAT anual sigue en $440.000 y WACC en 10,0%). ¿Cuál es el nuevo EVA anualizado?",
+      "hint": "Calculá el nuevo Capital Invertido (IC) y aplicá EVA = NOPAT_anual - (WACC * nuevo IC).",
+      "options": [
+        "A) +$40.000",
+        "B) -$10.000",
+        "C) +$90.000",
+        "D) +$540.000"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "El EVA inicial era $440.000 - (10% * $4.000.000) = +$40.000. Al liberar $500.000 de NWC, el nuevo IC baja a $3.500.000 (y el ROIC sube a 12,57%). El nuevo EVA es $440.000 - (10% * $3.500.000) = $440.000 - $350.000 = +$90.000. Liberar capital improductivo ahorra directamente el 10% anual de WACC sobre esos $500.000 (+$50.000 de EVA).",
+      "source_reference": "McKinsey & Company - Valuation"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_3",
+    "case_title": "Reestructuración de Capital y Rescate del EVA",
+    "company_name": "Textil Cordillerana S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Heredás una compañía con EBITDA positivo pero altamente endeudada, cobertura de intereses en zona de estrés y EVA negativo (ROIC < WACC). En 3 trimestres deberás recomponer la solvencia, optimizar el Capital Invertido y lograr un EVA positivo sostenible."
+  }
+}

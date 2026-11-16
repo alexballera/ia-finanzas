@@ -1,0 +1,6 @@
+fastapi
+pydantic
+numpy
+numpy-financial
+pytest
+httpx
