@@ -7,8 +7,12 @@ y las tasas y métricas de retorno están anualizadas.
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+ExecutiveVerdict = Literal["EXCELENTE", "ACEPTABLE", "RIESGOSO", "CRITICO"]
+AISource = Literal["gemini", "fallback"]
 
 
 class StrictModel(BaseModel):
@@ -86,11 +90,6 @@ class AlertSeverity(StrEnum):
     INFO = "INFO"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
-
-
-class FeedbackSource(StrEnum):
-    PLACEHOLDER = "PLACEHOLDER"
-    GEMINI = "GEMINI"
 
 
 # --- Catálogos ---------------------------------------------------------------
@@ -325,12 +324,85 @@ class Alert(StrictModel):
 
 
 class AIFeedback(StrictModel):
-    source: FeedbackSource
-    headline: str
-    analysis: str
-    strengths: list[str]
-    risks: list[str]
-    recommendation: str
+    executive_verdict: ExecutiveVerdict
+    board_diagnosis: str = Field(
+        description=(
+            "2 a 3 oraciones ejecutivas sobre el cambio en EVA, ROIC vs WACC, FCL o cobertura, "
+            "sin cifras ajenas al estado recibido."
+        )
+    )
+    risk_alert: str | None = Field(
+        default=None,
+        description=(
+            "Alerta concreta si cayó la cobertura, subió el spread a BB/CCC, hubo sobregiro "
+            "o se eligió un proyecto con VAN negativo."
+        ),
+    )
+    bibliographic_anchor: str = Field(
+        description=(
+            "Una línea que conecta el turno con Brealey-Myers, Ross-Westerfield, Damodaran, "
+            "Modigliani-Miller o McKinsey."
+        )
+    )
+    strategic_score: int = Field(ge=1, le=100)
+    ai_source: AISource
+
+
+# --- Resumen del turno para la evaluación cualitativa ------------------------
+
+
+class TurnDecision(StrictModel):
+    project_id: str | None
+    project_name: str | None
+    category: ProjectCategory | None
+    financing_option: FinancingOption | None
+    projected_npv: float | None = Field(
+        description="VAN ex-ante al WACC vigente al decidir; None si no hubo inversión."
+    )
+    projected_irr: float | None
+    capex: float
+    nwc_required: float
+    new_debt: float
+    new_equity: float
+    debt_repaid: float
+    dividends: float
+
+
+class KpiDeltas(StrictModel):
+    """Variación del trimestre: valor nuevo menos valor anterior."""
+
+    eva_annualized: float
+    roic_annualized: float
+    wacc: float
+    roic_wacc_spread: float
+    interest_coverage: float
+    credit_spread: float
+    net_debt_to_ebitda: float
+    free_cash_flow_firm: float
+    cash: float
+    total_debt: float
+
+
+class TurnSummary(StrictModel):
+    """Resumen compacto del turno; todos los números los calcula engine.py."""
+
+    company_name: str
+    mission_objective: str
+    quarter: int = Field(ge=0, description="0 = diagnóstico de apertura, sin decisión.")
+    max_quarters: int
+    prev_kpis: ValuationAndRiskKpis
+    new_kpis: ValuationAndRiskKpis
+    kpi_deltas: KpiDeltas
+    roic_wacc_spread: float
+    waterfall_fcf: list[WaterfallItem]
+    free_cash_flow_firm: float
+    cash: float
+    emergency_debt: float
+    decision: TurnDecision
+    applied_shock: MacroShock | None
+    game_status: GameStatus
+    end_reason: EndReason | None
+    consecutive_positive_eva_turns: int
 
 
 class InitSimulationRequest(StrictModel):

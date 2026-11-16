@@ -1,0 +1,4 @@
+# Secretos y variables de entorno locales
+.env
+backend/.env
+frontend/.env*.local

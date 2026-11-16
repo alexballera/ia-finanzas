@@ -25,6 +25,7 @@ from models import (
     GameStatus,
     HistoryEntry,
     IncomeStatementQ,
+    KpiDeltas,
     MacroEnvironment,
     MacroShock,
     ProjectCard,
@@ -34,6 +35,8 @@ from models import (
     ScenarioId,
     SimulationMeta,
     SimulationMode,
+    TurnDecision,
+    TurnSummary,
     ValuationAndRiskKpis,
     WaterfallItem,
     WaterfallKey,
@@ -911,3 +914,86 @@ def _resolve_game_status(
     if last_quarter:
         return GameStatus.GAME_OVER, EndReason.OBJECTIVE_NOT_MET
     return GameStatus.ACTIVE, None
+
+
+# --- Resumen del turno para la evaluación cualitativa ------------------------
+
+
+def build_turn_summary(
+    previous_state: CompanyState,
+    result: EngineResult,
+    scenario: ScenarioConfig | None = None,
+) -> TurnSummary:
+    """Resumen del turno con sus variaciones ya calculadas, para que la IA solo redacte.
+
+    Pasar el estado de apertura como `previous_state` produce el diagnóstico inicial
+    (trimestre 0, sin decisión y con variaciones nulas).
+    """
+    config = scenario if scenario is not None else get_scenario(previous_state.meta.scenario_id)
+    state = result.state
+    prev_kpis, new_kpis = previous_state.valuation_and_risk_kpis, state.valuation_and_risk_kpis
+    flows = state.cash_flow_q
+    quarter = state.meta.current_quarter
+    turn_was_played = quarter > previous_state.meta.current_quarter
+
+    entry = state.history_summary[-1] if turn_was_played else None
+    card = None
+    if entry is not None and entry.selected_project_id is not None:
+        # Se revalúa con el estado previo: es el VAN que vio el jugador al decidir.
+        card = next(
+            (
+                offered
+                for offered in offered_cards(config, previous_state, quarter)
+                if offered.project_id == entry.selected_project_id
+            ),
+            None,
+        )
+    is_investment = card is not None and card.category is not ProjectCategory.DEBT_REPAYMENT
+
+    prev_spread = prev_kpis.roic_annualized - prev_kpis.wacc
+    new_spread = new_kpis.roic_annualized - new_kpis.wacc
+    return TurnSummary(
+        company_name=state.meta.company_name,
+        mission_objective=state.meta.mission_objective,
+        quarter=quarter,
+        max_quarters=state.meta.max_quarters,
+        prev_kpis=prev_kpis,
+        new_kpis=new_kpis,
+        kpi_deltas=KpiDeltas(
+            eva_annualized=new_kpis.eva_annualized - prev_kpis.eva_annualized,
+            roic_annualized=new_kpis.roic_annualized - prev_kpis.roic_annualized,
+            wacc=new_kpis.wacc - prev_kpis.wacc,
+            roic_wacc_spread=new_spread - prev_spread,
+            interest_coverage=new_kpis.interest_coverage - prev_kpis.interest_coverage,
+            credit_spread=new_kpis.credit_spread - prev_kpis.credit_spread,
+            net_debt_to_ebitda=new_kpis.net_debt_to_ebitda - prev_kpis.net_debt_to_ebitda,
+            free_cash_flow_firm=(
+                flows.free_cash_flow_firm - previous_state.cash_flow_q.free_cash_flow_firm
+            ),
+            cash=state.balance_sheet.cash - previous_state.balance_sheet.cash,
+            total_debt=state.balance_sheet.total_debt - previous_state.balance_sheet.total_debt,
+        ),
+        roic_wacc_spread=new_spread,
+        waterfall_fcf=result.waterfall,
+        free_cash_flow_firm=flows.free_cash_flow_firm,
+        cash=state.balance_sheet.cash,
+        emergency_debt=flows.emergency_debt if turn_was_played else 0.0,
+        decision=TurnDecision(
+            project_id=card.project_id if card is not None else None,
+            project_name=card.name if card is not None else None,
+            category=card.category if card is not None else None,
+            financing_option=entry.financing_option if entry is not None else None,
+            projected_npv=card.projected_npv if is_investment else None,
+            projected_irr=card.projected_irr if is_investment else None,
+            capex=card.capex if card is not None else 0.0,
+            nwc_required=card.nwc_required if card is not None else 0.0,
+            new_debt=flows.new_debt if turn_was_played else 0.0,
+            new_equity=flows.new_equity if turn_was_played else 0.0,
+            debt_repaid=flows.debt_repaid if turn_was_played else 0.0,
+            dividends=flows.dividends if turn_was_played else 0.0,
+        ),
+        applied_shock=result.applied_shock,
+        game_status=state.meta.game_status,
+        end_reason=state.meta.end_reason,
+        consecutive_positive_eva_turns=state.meta.consecutive_positive_eva_turns,
+    )

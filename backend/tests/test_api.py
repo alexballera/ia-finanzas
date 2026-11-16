@@ -1,15 +1,46 @@
+import json
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
 
+import ai_evaluator
 from main import app
+from models import AIFeedback
 
 client = TestClient(app)
+
+FAKE_API_KEY = "clave-de-prueba-123"
+
+
+@pytest.fixture(autouse=True)
+def _without_gemini_credentials(monkeypatch):
+    # backend/.env puede traer una clave real: ningún test debe llamar a Gemini de verdad.
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_MODEL", raising=False)
+
+
+@pytest.fixture
+def gemini_client(monkeypatch):
+    """Reemplaza genai.Client por un mock y configura una clave de prueba."""
+    client_cls = MagicMock(name="genai.Client")
+    monkeypatch.setattr(ai_evaluator.genai, "Client", client_cls)
+    monkeypatch.setenv("GEMINI_API_KEY", FAKE_API_KEY)
+    return client_cls
 
 
 def _init(scenario_id: str) -> dict:
     response = client.post("/api/simulation/init", json={"scenario_id": scenario_id})
     assert response.status_code == 200
     return response.json()
+
+
+def _step(state: dict, project_id: str | None = None, financing: str = "CASH_100"):
+    return client.post(
+        "/api/simulation/step",
+        json={"state": state, "selected_project_id": project_id, "financing_option": financing},
+    )
 
 
 def test_health():
@@ -37,7 +68,7 @@ def test_init_returns_opening_state(scenario_id, company_name, max_quarters):
     assert body["state"]["meta"]["game_status"] == "ACTIVE"
     assert len(body["waterfall"]) == 7
     assert all("projected_npv" in card for card in body["offered_projects"])
-    assert body["ai_feedback"]["source"] == "PLACEHOLDER"
+    assert body["ai_feedback"]["ai_source"] == "fallback"
 
 
 def test_init_rejects_unknown_scenario():
@@ -64,7 +95,6 @@ def test_step_round_trips_the_state_returned_by_init():
     assert body["state"]["meta"]["current_quarter"] == 1
     assert body["state"]["active_projects"][0]["project_id"] == card["project_id"]
     assert body["state"]["history_summary"][0]["financing_option"] == "DEBT_50_CASH_50"
-    assert body["ai_feedback"]["source"] == "PLACEHOLDER"
 
 
 def test_step_rejects_blocked_debt_financing():
@@ -92,3 +122,105 @@ def test_step_rejects_finished_simulation():
     response = client.post("/api/simulation/step", json={"state": state})
 
     assert response.status_code == 409
+
+
+# --- Feedback del Directorio (Gemini con fallback determinista) --------------
+
+
+def test_step_uses_fallback_when_api_key_is_missing(monkeypatch):
+    client_cls = MagicMock(name="genai.Client")
+    monkeypatch.setattr(ai_evaluator.genai, "Client", client_cls)
+    opening = _init("sim_mod_1")
+
+    response = _step(opening["state"], "P01_AUTOMATION_LINE", "DEBT_50_CASH_50")
+
+    assert response.status_code == 200
+    feedback = AIFeedback.model_validate(response.json()["ai_feedback"])
+    assert feedback.ai_source == "fallback"
+    assert feedback.board_diagnosis
+    client_cls.assert_not_called()
+
+
+def test_step_returns_gemini_feedback_when_gemini_answers(gemini_client, monkeypatch):
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-de-prueba")
+    verdict = ai_evaluator.BoardVerdict(
+        executive_verdict="EXCELENTE",
+        board_diagnosis="El EVA mejoró porque el ROIC del proyecto supera al WACC.",
+        risk_alert=None,
+        bibliographic_anchor="Brealey-Myers: regla del VAN.",
+        strategic_score=88,
+    )
+    generate_content = gemini_client.return_value.models.generate_content
+    generate_content.return_value = SimpleNamespace(parsed=verdict, text=verdict.model_dump_json())
+
+    opening = _init("sim_mod_1")
+    gemini_client.assert_not_called()  # el arranque no consulta a Gemini
+
+    response = _step(opening["state"], "P01_AUTOMATION_LINE", "DEBT_50_CASH_50")
+
+    assert response.status_code == 200
+    feedback = AIFeedback.model_validate(response.json()["ai_feedback"])
+    assert feedback == AIFeedback(**verdict.model_dump(), ai_source="gemini")
+
+    assert gemini_client.call_args.kwargs["api_key"] == FAKE_API_KEY
+    call = generate_content.call_args.kwargs
+    assert call["model"] == "gemini-de-prueba"
+    assert call["config"].temperature == 0.3
+    assert call["config"].response_schema is ai_evaluator.BoardVerdict
+    assert "ai_source" not in ai_evaluator.BoardVerdict.model_fields
+    # Los deltas viajan ya calculados por el motor, no los deriva Gemini.
+    new_eva = response.json()["state"]["valuation_and_risk_kpis"]["eva_annualized"]
+    old_eva = opening["state"]["valuation_and_risk_kpis"]["eva_annualized"]
+    turn_summary = json.loads(call["contents"].splitlines()[1])
+    assert turn_summary["kpi_deltas"]["eva_annualized"] == pytest.approx(new_eva - old_eva, abs=0.05)
+    assert turn_summary["decision"]["project_name"] == "Automatización de línea de producción"
+
+
+@pytest.mark.parametrize(
+    "failure",
+    ["client_error", "timeout", "unparseable_response"],
+)
+def test_step_falls_back_gracefully_when_gemini_fails(gemini_client, caplog, failure):
+    generate_content = gemini_client.return_value.models.generate_content
+    if failure == "client_error":
+        gemini_client.side_effect = RuntimeError(f"credenciales rechazadas: {FAKE_API_KEY}")
+    elif failure == "timeout":
+        generate_content.side_effect = TimeoutError("la solicitud excedió el tiempo límite")
+    else:
+        generate_content.return_value = SimpleNamespace(parsed=None, text="esto no es JSON")
+    opening = _init("sim_mod_1")
+
+    with caplog.at_level("WARNING", logger="ai_evaluator"):
+        response = _step(opening["state"], "P01_AUTOMATION_LINE", "DEBT_50_CASH_50")
+
+    assert response.status_code == 200
+    feedback = AIFeedback.model_validate(response.json()["ai_feedback"])
+    assert feedback.ai_source == "fallback"
+    assert len(caplog.records) == 1
+    assert "Gemini no disponible" in caplog.text
+    assert FAKE_API_KEY not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("scenario_id", "project_id", "financing", "verdict", "alert_fragment"),
+    [
+        ("sim_mod_3", "P04_PREMIUM_LINE", "CASH_100", "CRITICO", "Insolvencia"),
+        ("sim_mod_3", "P08_EQUITY_RECAPITALIZATION", "EQUITY_100", "ACEPTABLE", "zona CCC"),
+        ("sim_mod_1", "P02_EXPORT_EXPANSION", "CASH_100", "RIESGOSO", "sobregiro de emergencia"),
+        ("sim_mod_1", "P04_PREMIUM_LINE", "EQUITY_100", None, "VAN proyectado de -"),
+        ("sim_mod_1", "P01_AUTOMATION_LINE", "DEBT_50_CASH_50", "EXCELENTE", None),
+    ],
+)
+def test_fallback_feedback_flags_the_risk_of_the_turn(
+    scenario_id, project_id, financing, verdict, alert_fragment
+):
+    opening = _init(scenario_id)
+
+    feedback = _step(opening["state"], project_id, financing).json()["ai_feedback"]
+
+    if verdict is not None:
+        assert feedback["executive_verdict"] == verdict
+    if alert_fragment is None:
+        assert feedback["risk_alert"] is None
+    else:
+        assert alert_fragment in feedback["risk_alert"]
