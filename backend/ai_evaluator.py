@@ -11,8 +11,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
 from pydantic import BaseModel, Field
 
 from models import (
@@ -390,6 +388,10 @@ def build_prompt(summary: TurnSummary) -> str:
 
 
 def _ask_gemini(summary: TurnSummary, api_key: str) -> AIFeedback:
+    # Import diferido: cargar el SDK tarda varios segundos y solo hace falta al llamar a Gemini.
+    from google import genai
+    from google.genai import types
+
     model = os.getenv("GEMINI_MODEL", "").strip() or DEFAULT_GEMINI_MODEL
     client = genai.Client(
         api_key=api_key, http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS)

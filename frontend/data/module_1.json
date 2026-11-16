@@ -30,7 +30,7 @@
         "variables_legend": [
           { "symbol": "EBIT", "meaning": "Resultado operativo antes de intereses e impuestos (EBITDA - D&A)" },
           { "symbol": "T", "meaning": "Tasa impositiva corporativa (estándar 30%)" },
-          { "symbol": "D&A", "meaning": "Depreciación y Amortización del período" },
+          { "symbol": "D\\&A", "meaning": "Depreciación y Amortización del período" },
           { "symbol": "Capex", "meaning": "Inversión en bienes de capital (activos fijos)" },
           { "symbol": "\\Delta NWC", "meaning": "Variación del Capital de Trabajo Neto (si crece, consume caja)" }
         ],

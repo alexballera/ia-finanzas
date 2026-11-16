@@ -1,4 +1,7 @@
 import json
+import subprocess
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -12,6 +15,7 @@ from models import AIFeedback
 client = TestClient(app)
 
 FAKE_API_KEY = "clave-de-prueba-123"
+BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture(autouse=True)
@@ -25,7 +29,8 @@ def _without_gemini_credentials(monkeypatch):
 def gemini_client(monkeypatch):
     """Reemplaza genai.Client por un mock y configura una clave de prueba."""
     client_cls = MagicMock(name="genai.Client")
-    monkeypatch.setattr(ai_evaluator.genai, "Client", client_cls)
+    # ai_evaluator importa el SDK de forma diferida, así que se parchea en su módulo de origen.
+    monkeypatch.setattr("google.genai.Client", client_cls)
     monkeypatch.setenv("GEMINI_API_KEY", FAKE_API_KEY)
     return client_cls
 
@@ -48,6 +53,23 @@ def test_health():
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+def test_swagger_docs_are_served_under_api_prefix():
+    assert client.get("/api/docs").status_code == 200
+    schema = client.get("/api/openapi.json")
+
+    assert schema.status_code == 200
+    assert "/api/simulation/step" in schema.json()["paths"]
+
+
+def test_importing_the_app_does_not_load_the_gemini_sdk():
+    # El SDK tarda segundos en importarse: solo debe cargarse al llamar a Gemini.
+    probe = "import sys, main; sys.exit(int('google.genai' in sys.modules))"
+
+    completed = subprocess.run([sys.executable, "-c", probe], cwd=BACKEND_DIR, timeout=120)
+
+    assert completed.returncode == 0
 
 
 @pytest.mark.parametrize(
@@ -129,7 +151,7 @@ def test_step_rejects_finished_simulation():
 
 def test_step_uses_fallback_when_api_key_is_missing(monkeypatch):
     client_cls = MagicMock(name="genai.Client")
-    monkeypatch.setattr(ai_evaluator.genai, "Client", client_cls)
+    monkeypatch.setattr("google.genai.Client", client_cls)
     opening = _init("sim_mod_1")
 
     response = _step(opening["state"], "P01_AUTOMATION_LINE", "DEBT_50_CASH_50")

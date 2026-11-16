@@ -1,69 +1,109 @@
-import Image from "next/image";
+import { BookOpen, Layers, Target, Trophy, type LucideIcon } from "lucide-react";
+
+import { CurriculumGrid, type ModuleSummary } from "@/components/CurriculumGrid";
+import { SimulatorBanner } from "@/components/SimulatorBanner";
+import { Badge } from "@/components/ui";
+import { FUTURE_MODULES, MODULES } from "@/lib/modules";
+
+const METHODOLOGY: readonly { icon: LucideIcon; step: string; title: string; text: string }[] = [
+  {
+    icon: BookOpen,
+    step: "Fase 1",
+    title: "Teoría condensada",
+    text: "La intuición del CFO, las fórmulas clave, los errores típicos y un ejemplo resuelto paso a paso.",
+  },
+  {
+    icon: Layers,
+    step: "Fase 2",
+    title: "Flashcards y quizzes",
+    text: "Ocho tarjetas por módulo: conceptos para autoevaluar y ejercicios de cálculo con corrección inmediata.",
+  },
+  {
+    icon: Target,
+    step: "Fase 3",
+    title: "Simulación de caso real",
+    text: "Tres trimestres como CFO de una empresa: cada decisión mueve el flujo de caja, el WACC y el EVA.",
+  },
+  {
+    icon: Trophy,
+    step: "Evaluación final",
+    title: "«Cashflow Corporativo»",
+    text: "Simulador integrador de hasta 12 trimestres para lograr un EVA positivo sostenido con solvencia.",
+  },
+];
+
+const BIBLIOGRAPHY = [
+  "Brealey, Myers & Allen",
+  "Ross, Westerfield & Jaffe",
+  "Berk & DeMarzo",
+  "Damodaran",
+  "McKinsey (Koller, Goedhart & Wessels)",
+];
+
+const MODULE_SUMMARIES: ModuleSummary[] = MODULES.map((courseModule) => ({
+  moduleId: courseModule.module_id,
+  title: courseModule.title,
+  subtitle: courseModule.subtitle,
+  conceptCount: courseModule.phase_1_theory.concepts.length,
+  cardCount: courseModule.phase_2_cards.length,
+  companyName: courseModule.phase_3_brief.company_name,
+}));
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="space-y-12">
+      <section aria-labelledby="hero-title">
+        <Badge tone="emerald">Plataforma educativa de Finanzas Corporativas</Badge>
+        <h1
+          id="hero-title"
+          className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+        >
+          Aprender a decidir como un CFO: de la fórmula a la creación de valor
+        </h1>
+        <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-300">
+          Tres módulos progresivos, cada uno en tres fases: teoría condensada, práctica con
+          flashcards y quizzes, y la simulación de un caso real. El recorrido cierra con una
+          evaluación final integradora, «Cashflow Corporativo».
+        </p>
+
+        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {METHODOLOGY.map(({ icon: Icon, step, title, text }) => (
+            <li key={step} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 text-emerald-300">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="text-xs font-semibold tracking-wide text-emerald-300 uppercase">
+                  {step}
+                </span>
+              </div>
+              <h2 className="mt-4 text-base font-semibold text-white">{title}</h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{text}</p>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-6 flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-medium text-slate-400">Bibliografía base:</span>
+          {BIBLIOGRAPHY.map((source) => (
+            <Badge key={source}>{source}</Badge>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="curriculum-title">
+        <div className="mb-6">
+          <h2 id="curriculum-title" className="text-2xl font-semibold tracking-tight text-white">
+            Mapa curricular
+          </h2>
+          <p className="mt-1.5 text-sm text-slate-400">
+            Tres módulos disponibles y tres en el roadmap. El progreso se guarda en este navegador.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <CurriculumGrid modules={MODULE_SUMMARIES} futureModules={FUTURE_MODULES} />
+      </section>
+
+      <SimulatorBanner />
     </div>
   );
 }
