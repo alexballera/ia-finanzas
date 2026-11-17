@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 import { Phase1Theory } from "./Phase1Theory";
 import { Phase2Cards } from "./Phase2Cards";
-import { Phase3Placeholder } from "./Phase3Placeholder";
+import { CFOSimulator } from "./simulator/CFOSimulator";
 import { Badge, Panel, buttonStyles } from "./ui";
 
 const PHASES: readonly { phase: PhaseNumber; title: string; subtitle: string }[] = [
@@ -177,7 +177,13 @@ function ModulePhases({ courseModule, state }: { courseModule: CourseModule; sta
             onContinue={() => goToPhase(3)}
           />
         )}
-        {activePhase === 3 && <Phase3Placeholder brief={courseModule.phase_3_brief} />}
+        {activePhase === 3 && (
+          // Al ganar, `saveSimulation` marca phase3Won en localStorage y el stepper se actualiza.
+          <CFOSimulator
+            scenarioId={courseModule.phase_3_brief.scenario_id}
+            moduleId={courseModule.module_id}
+          />
+        )}
       </div>
     </>
   );

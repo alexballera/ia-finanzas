@@ -9,12 +9,11 @@
 import { useSyncExternalStore } from "react";
 
 import type { ModuleId, PhaseNumber, ScenarioId, SimulationStepResponse } from "./types";
+import { SCENARIO_IDS, isRecord, isSimulationStepResponse } from "./validation";
 
 const STORAGE_KEY = "ia-finanzas:state:v1";
 
 export const MODULE_IDS: readonly ModuleId[] = [1, 2, 3];
-
-const SCENARIO_IDS: readonly ScenarioId[] = ["sim_mod_1", "sim_mod_2", "sim_mod_3", "final_game"];
 
 export interface ModuleProgress {
   phase1Viewed: boolean;
@@ -62,10 +61,6 @@ const DEFAULT_STATE: AppState = createDefaultState();
 
 // --- Lectura validada --------------------------------------------------------
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function parseModuleProgress(value: unknown): ModuleProgress {
   if (!isRecord(value)) {
     return { ...EMPTY_MODULE_PROGRESS };
@@ -90,18 +85,14 @@ function parseModuleProgress(value: unknown): ModuleProgress {
 }
 
 function parseSavedSimulation(value: unknown, scenarioId: ScenarioId): SavedSimulation | null {
-  if (!isRecord(value) || !isRecord(value.response)) {
-    return null;
-  }
-  const state = value.response.state;
-  if (!isRecord(state) || !isRecord(state.meta) || state.meta.scenario_id !== scenarioId) {
+  // Una partida guardada con otra estructura (versión vieja, edición manual) se descarta entera.
+  if (!isRecord(value) || !isSimulationStepResponse(value.response, scenarioId)) {
     return null;
   }
   return {
     scenarioId,
     savedAt: typeof value.savedAt === "string" ? value.savedAt : "",
-    // El backend valida el estado completo en cada turno; aquí solo se descarta lo ilegible.
-    response: value.response as unknown as SimulationStepResponse,
+    response: value.response,
   };
 }
 
@@ -263,14 +254,22 @@ export function recordPhase2Result(moduleId: ModuleId, score: number, total: num
   });
 }
 
-export function markPhase3Won(moduleId: ModuleId): void {
-  updateModule(moduleId, (progress) => ({ ...progress, phase3Won: true }));
-}
-
+/**
+ * Guarda la última respuesta del backend para retomar la partida al recargar.
+ * Si la partida de un módulo terminó en WON, marca además su Fase 3 como ganada.
+ */
 export function saveSimulation(response: SimulationStepResponse): void {
-  const scenarioId = response.state.meta.scenario_id;
+  const { scenario_id: scenarioId, module_id: moduleId, game_status: status } = response.state.meta;
+  const wonModuleId = status === "WON" ? MODULE_IDS.find((id) => id === moduleId) : undefined;
   updateState((current) => ({
     ...current,
+    modules:
+      wonModuleId === undefined
+        ? current.modules
+        : {
+            ...current.modules,
+            [wonModuleId]: { ...current.modules[wonModuleId], phase3Won: true },
+          },
     simulations: {
       ...current.simulations,
       [scenarioId]: { scenarioId, savedAt: new Date().toISOString(), response },
@@ -278,6 +277,7 @@ export function saveSimulation(response: SimulationStepResponse): void {
   }));
 }
 
+/** Descarta la partida guardada de un escenario; el cockpit inicia una nueva. */
 export function clearSimulation(scenarioId: ScenarioId): void {
   updateState((current) => {
     const simulations = { ...current.simulations };

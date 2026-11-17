@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SimulatorPlaceholder } from "@/components/SimulatorPlaceholder";
+import { FinalSimulatorGate } from "@/components/FinalSimulatorGate";
 
 export const metadata: Metadata = {
   title: "Simulador Final: Cashflow Corporativo",
@@ -18,7 +18,7 @@ export default function SimulatorPage() {
           operativa».
         </p>
       </header>
-      <SimulatorPlaceholder />
+      <FinalSimulatorGate />
     </div>
   );
 }
