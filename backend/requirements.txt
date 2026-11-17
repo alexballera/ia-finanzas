@@ -4,5 +4,3 @@ numpy
 numpy-financial
 google-genai
 python-dotenv
-pytest
-httpx

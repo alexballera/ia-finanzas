@@ -9,8 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 import ai_evaluator
+import engine
 from main import app
-from models import AIFeedback
+from models import AIFeedback, EndReason
 
 client = TestClient(app)
 
@@ -185,6 +186,7 @@ def test_step_returns_gemini_feedback_when_gemini_answers(gemini_client, monkeyp
     assert feedback == AIFeedback(**verdict.model_dump(), ai_source="gemini")
 
     assert gemini_client.call_args.kwargs["api_key"] == FAKE_API_KEY
+    assert gemini_client.call_args.kwargs["http_options"].timeout >= 30_000
     call = generate_content.call_args.kwargs
     assert call["model"] == "gemini-de-prueba"
     assert call["config"].temperature == 0.3
@@ -194,8 +196,11 @@ def test_step_returns_gemini_feedback_when_gemini_answers(gemini_client, monkeyp
     new_eva = response.json()["state"]["valuation_and_risk_kpis"]["eva_annualized"]
     old_eva = opening["state"]["valuation_and_risk_kpis"]["eva_annualized"]
     turn_summary = json.loads(call["contents"].splitlines()[1])
-    assert turn_summary["kpi_deltas"]["eva_annualized"] == pytest.approx(new_eva - old_eva, abs=0.05)
+    formatted_delta = f"{abs(new_eva - old_eva):,.1f}".translate(str.maketrans(",.", ".,"))
+    sign = "-" if round(new_eva - old_eva, 1) < 0 else ""
+    assert turn_summary["kpi_deltas"]["eva_annualized"] == f"{sign}${formatted_delta}k"
     assert turn_summary["decision"]["project_name"] == "Automatización de línea de producción"
+    assert "punto para miles" in call["config"].system_instruction
 
 
 @pytest.mark.parametrize(
@@ -246,3 +251,41 @@ def test_fallback_feedback_flags_the_risk_of_the_turn(
         assert feedback["risk_alert"] is None
     else:
         assert alert_fragment in feedback["risk_alert"]
+
+
+def test_spanish_formatting_in_prompt_and_fallback():
+    result = engine.init_simulation("sim_mod_1")
+    summary = engine.build_turn_summary(result.state, result)
+    kpis = summary.new_kpis.model_copy(update={
+        "eva_annualized": -2272.5,
+        "roic_annualized": 0.112,
+        "wacc": 0.125,
+        "interest_coverage": 1.25,
+    })
+    summary = summary.model_copy(update={
+        "new_kpis": kpis,
+        "cash": -2272.5,
+        "end_reason": EndReason.INSOLVENCY,
+    })
+    feedback = ai_evaluator.build_rule_based_feedback(summary)
+    payload = json.loads(ai_evaluator.build_prompt(summary).splitlines()[1])
+
+    assert "-$2.272,5k" in feedback.board_diagnosis
+    assert "11,20%" in feedback.board_diagnosis
+    assert "1,25x" in feedback.board_diagnosis
+    assert "-$2.272,5k" in feedback.risk_alert
+    assert "1,25x" in feedback.risk_alert
+    assert payload["new_kpis"]["eva_annualized"] == "-$2.272,5k"
+    assert payload["new_kpis"]["roic_annualized"] == "11,20%"
+    assert payload["new_kpis"]["interest_coverage"] == "1,25x"
+
+
+def test_spanish_formatting_for_emergency_debt_and_negative_npv():
+    result = engine.init_simulation("sim_mod_1")
+    summary = engine.build_turn_summary(result.state, result)
+    summary = summary.model_copy(update={"quarter": 1, "emergency_debt": 2272.5})
+    assert "$2.272,5k" in ai_evaluator.build_rule_based_feedback(summary).risk_alert
+
+    decision = summary.decision.model_copy(update={"projected_npv": -2272.5})
+    summary = summary.model_copy(update={"emergency_debt": 0, "decision": decision})
+    assert "-$2.272,5k" in ai_evaluator.build_rule_based_feedback(summary).risk_alert

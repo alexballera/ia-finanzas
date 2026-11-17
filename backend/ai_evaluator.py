@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 GEMINI_TEMPERATURE = 0.3
-GEMINI_TIMEOUT_MS = 15_000
+GEMINI_TIMEOUT_MS = 30_000
 
 EXCELLENT_MIN_SCORE = 80
 ACCEPTABLE_MIN_SCORE = 60
@@ -46,9 +46,11 @@ Reglas innegociables:
 1. No calculás nada. Todas las cifras, las variaciones (kpi_deltas) y los diferenciales ya \
 vienen calculados por el motor financiero. Usá únicamente los números del resumen del turno: \
 no inventes, estimes ni recalcules cifras.
-2. Las cifras ya vienen formateadas y listas para citar: montos en miles de USD, flujos \
-trimestrales, tasas y EVA anualizados, variaciones de tasas en puntos porcentuales (pp) y \
-múltiplos en veces (x). Citá las cifras tal como vienen, sin convertirlas.
+2. Las cifras financieras ya vienen formateadas y listas para citar: punto para miles y \
+coma para decimales (por ejemplo, $2.272,5k y 11,2%). Los montos están en miles de USD, \
+los flujos son trimestrales, las tasas y el EVA son anualizados, las variaciones de tasas \
+están en puntos porcentuales (pp) y los múltiplos en veces (x). En board_diagnosis y \
+risk_alert citá las cifras tal como vienen, sin convertirlas ni usar formato inglés.
 3. Hablale al CFO de vos, en español rioplatense, con tono ejecutivo, sobrio y directo. Sin \
 saludos, sin relleno y sin markdown.
 4. Si quarter es 0 no hubo decisión: es el diagnóstico de apertura de la empresa.
@@ -161,26 +163,26 @@ def _executive_verdict(summary: TurnSummary, score: int) -> ExecutiveVerdict:
 def _board_diagnosis(summary: TurnSummary) -> str:
     kpis, deltas, decision = summary.new_kpis, summary.kpi_deltas, summary.decision
     coverage = (
-        f"La cobertura de intereses es de {kpis.interest_coverage:.2f}x "
+        f"La cobertura de intereses es de {_multiple(kpis.interest_coverage)} "
         f"(calificación sintética {kpis.credit_rating.value}) y el FCL del trimestre "
-        f"fue de {summary.free_cash_flow_firm:,.0f}."
+        f"fue de {_amount(summary.free_cash_flow_firm)}."
     )
     if summary.quarter == 0:
         return (
-            f"{summary.company_name} abre con un ROIC de {kpis.roic_annualized:.1%} frente a "
-            f"un WACC de {kpis.wacc:.1%} y un EVA anualizado de {kpis.eva_annualized:,.0f}. "
+            f"{summary.company_name} abre con un ROIC de {_pct(kpis.roic_annualized)} frente a "
+            f"un WACC de {_pct(kpis.wacc)} y un EVA anualizado de {_amount(kpis.eva_annualized)}. "
             f"{coverage}"
         )
 
     if deltas.eva_annualized > 0:
-        eva_change = f"subió {deltas.eva_annualized:,.0f}"
+        eva_change = f"subió {_amount(deltas.eva_annualized)}"
     elif deltas.eva_annualized < 0:
-        eva_change = f"bajó {abs(deltas.eva_annualized):,.0f}"
+        eva_change = f"bajó {_amount(abs(deltas.eva_annualized))}"
     else:
         eva_change = "no varió"
     value = (
-        f"El EVA anualizado {eva_change} y cierra en {kpis.eva_annualized:,.0f}, con un ROIC "
-        f"de {kpis.roic_annualized:.1%} frente a un WACC de {kpis.wacc:.1%}."
+        f"El EVA anualizado {eva_change} y cierra en {_amount(kpis.eva_annualized)}, con un ROIC "
+        f"de {_pct(kpis.roic_annualized)} frente a un WACC de {_pct(kpis.wacc)}."
     )
 
     if summary.end_reason is EndReason.INSOLVENCY:
@@ -195,7 +197,7 @@ def _board_diagnosis(summary: TurnSummary) -> str:
         financing = _FINANCING_LABELS.get(decision.financing_option, "caja propia")
         closing = f"Se aprobó «{decision.project_name}» con {financing}"
         if decision.projected_npv is not None:
-            closing += f" y un VAN proyectado de {decision.projected_npv:,.0f}"
+            closing += f" y un VAN proyectado de {_amount(decision.projected_npv)}"
         closing += "."
     return f"{value} {coverage} {closing}"
 
@@ -207,35 +209,35 @@ def _risk_alert(summary: TurnSummary) -> str | None:
 
     if summary.end_reason is EndReason.INSOLVENCY:
         return (
-            f"Insolvencia: la caja cerró en {summary.cash:,.0f} sin capacidad crediticia "
-            f"(Deuda Neta/EBITDA de {kpis.net_debt_to_ebitda:.2f}x y cobertura de "
-            f"{kpis.interest_coverage:.2f}x)."
+            f"Insolvencia: la caja cerró en {_amount(summary.cash)} sin capacidad crediticia "
+            f"(Deuda Neta/EBITDA de {_multiple(kpis.net_debt_to_ebitda)} y cobertura de "
+            f"{_multiple(kpis.interest_coverage)})."
         )
     if summary.emergency_debt > 0:
         return (
-            f"Se tomó un sobregiro de emergencia por {summary.emergency_debt:,.0f} para "
+            f"Se tomó un sobregiro de emergencia por {_amount(summary.emergency_debt)} para "
             "cubrir el déficit de caja del trimestre."
         )
     if decision.projected_npv is not None and decision.projected_npv < 0:
         return (
-            f"El proyecto aprobado tiene un VAN proyectado de {decision.projected_npv:,.0f} "
+            f"El proyecto aprobado tiene un VAN proyectado de {_amount(decision.projected_npv)} "
             "al WACC vigente: destruye valor aunque sume EBITDA."
         )
     if deltas.credit_spread > 0:
         return (
-            f"El spread crediticio subió a {kpis.credit_spread:.1%} (calificación "
+            f"El spread crediticio subió a {_pct(kpis.credit_spread)} (calificación "
             f"{kpis.credit_rating.value}) porque la cobertura de intereses quedó en "
-            f"{kpis.interest_coverage:.2f}x.{blocked}"
+            f"{_multiple(kpis.interest_coverage)}.{blocked}"
         )
     if in_ccc:
         return (
-            f"La cobertura de intereses de {kpis.interest_coverage:.2f}x mantiene a la "
+            f"La cobertura de intereses de {_multiple(kpis.interest_coverage)} mantiene a la "
             f"empresa en zona CCC.{blocked}"
         )
     if deltas.interest_coverage < 0 and kpis.interest_coverage < 3.0:
         return (
-            f"La cobertura de intereses cayó {abs(deltas.interest_coverage):.2f}x y quedó en "
-            f"{kpis.interest_coverage:.2f}x, por debajo del grado de inversión."
+            f"La cobertura de intereses cayó {_multiple(abs(deltas.interest_coverage))} y quedó en "
+            f"{_multiple(kpis.interest_coverage)}, por debajo del grado de inversión."
         )
     return None
 
@@ -291,21 +293,29 @@ def build_rule_based_feedback(summary: TurnSummary) -> AIFeedback:
 # --- Evaluación con Gemini ---------------------------------------------------
 
 
-def _amount(value: float) -> float | int:
-    rounded = round(value, 1)
-    return int(rounded) if rounded == int(rounded) else rounded
+def _number(value: float, digits: int, signed: bool = False) -> str:
+    if round(value, digits) == 0:
+        value = 0.0
+    sign = "+" if signed and value > 0 else ""
+    formatted = f"{value:,.{digits}f}".translate(str.maketrans(",.", ".,"))
+    return f"{sign}{formatted}"
+
+
+def _amount(value: float) -> str:
+    sign = "-" if round(value, 1) < 0 else ""
+    return f"{sign}${_number(abs(value), 1)}k"
 
 
 def _pct(value: float) -> str:
-    return f"{value * 100:.2f}%"
+    return f"{_number(value * 100, 2)}%"
 
 
 def _pp(value: float) -> str:
-    return f"{value * 100:+.2f} pp"
+    return f"{_number(value * 100, 2, signed=True)} pp"
 
 
-def _multiple(value: float) -> str:
-    return f"{value:.2f}x"
+def _multiple(value: float, signed: bool = False) -> str:
+    return f"{_number(value, 2, signed=signed)}x"
 
 
 def _kpis_view(kpis: ValuationAndRiskKpis) -> dict[str, object]:
@@ -320,7 +330,7 @@ def _kpis_view(kpis: ValuationAndRiskKpis) -> dict[str, object]:
         "interest_coverage": _multiple(kpis.interest_coverage),
         "net_debt_to_ebitda": _multiple(kpis.net_debt_to_ebitda),
         "d_to_e": _multiple(kpis.d_to_e),
-        "levered_beta": round(kpis.levered_beta, 2),
+        "levered_beta": _number(kpis.levered_beta, 2),
         "invested_capital": _amount(kpis.invested_capital),
     }
 
@@ -365,9 +375,9 @@ def build_prompt(summary: TurnSummary) -> str:
             "roic_annualized": _pp(deltas.roic_annualized),
             "wacc": _pp(deltas.wacc),
             "roic_wacc_spread": _pp(deltas.roic_wacc_spread),
-            "interest_coverage": f"{deltas.interest_coverage:+.2f}x",
+            "interest_coverage": _multiple(deltas.interest_coverage, signed=True),
             "credit_spread": _pp(deltas.credit_spread),
-            "net_debt_to_ebitda": f"{deltas.net_debt_to_ebitda:+.2f}x",
+            "net_debt_to_ebitda": _multiple(deltas.net_debt_to_ebitda, signed=True),
             "free_cash_flow_firm": _amount(deltas.free_cash_flow_firm),
             "cash": _amount(deltas.cash),
             "total_debt": _amount(deltas.total_debt),
