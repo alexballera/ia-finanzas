@@ -101,7 +101,8 @@ def project_incremental_cash_flows(
         card.ebitda_boost_q, card.ebitda_driver, demand_multiplier, cost_inflation_multiplier
     )
     ebit = boost - depreciation
-    operating_flow = ebit - ebit * corporate_tax_rate + depreciation
+    operating_taxes = max(0.0, ebit * corporate_tax_rate)
+    operating_flow = ebit - operating_taxes + depreciation
 
     flows = [-(card.capex + card.nwc_required)]
     flows.extend(operating_flow for _ in range(card.duration_quarters))
@@ -440,6 +441,8 @@ def is_goal_met(
         goal.final_eva_above is None or kpis.eva_annualized > goal.final_eva_above,
         goal.cumulative_approved_npv_above is None
         or meta.cumulative_approved_npv > goal.cumulative_approved_npv_above,
+        goal.cumulative_dividends_above is None
+        or meta.cumulative_dividends > goal.cumulative_dividends_above,
         goal.interest_coverage_at_least is None
         or kpis.interest_coverage >= goal.interest_coverage_at_least,
         goal.max_emergency_overdrafts is None
@@ -583,6 +586,7 @@ def init_simulation(
         debt_100_blocked=kpis.interest_coverage < CCC_COVERAGE_THRESHOLD,
         emergency_overdraft_count=0,
         cumulative_approved_npv=0.0,
+        cumulative_dividends=0.0,
         cumulative_fcff=0.0,
     )
     state = CompanyState(
@@ -693,6 +697,25 @@ def step_simulation(
         )
 
     interest_coverage = compute_interest_coverage(income.ebit, income.interest_expense)
+    projected_cash_before_dividends = (
+        start_balance.cash
+        + income.net_income
+        + income.depreciation
+        - capex
+        - delta_nwc
+        + new_debt
+        - debt_repaid
+        + new_equity
+    )
+    if dividends > max(0.0, projected_cash_before_dividends) + BALANCE_TOLERANCE:
+        raise InvalidDecisionError(
+            "Los dividendos superan la caja proyectada disponible para este trimestre."
+        )
+    if dividends > 0.0 and interest_coverage < CCC_COVERAGE_THRESHOLD:
+        raise InvalidDecisionError(
+            "No se pueden distribuir dividendos con cobertura de intereses en zona CCC (< 1.5x)."
+        )
+
     emergency_debt = 0.0
     insolvent = False
     if cash < 0:
@@ -802,6 +825,7 @@ def step_simulation(
                 state.meta.cumulative_approved_npv
                 + (card.projected_npv or 0.0 if card is not None else 0.0)
             ),
+            "cumulative_dividends": state.meta.cumulative_dividends + dividends,
             "cumulative_fcff": state.meta.cumulative_fcff + fcff,
         }
     )
@@ -859,6 +883,7 @@ def step_simulation(
         roic_annualized=kpis.roic_annualized,
         eva_annualized=kpis.eva_annualized,
         emergency_debt=emergency_debt,
+        dividends=dividends,
         game_status=game_status,
     )
     new_state = CompanyState(

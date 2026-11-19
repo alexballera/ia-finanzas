@@ -1,0 +1,222 @@
+{
+  "module_id": 5,
+  "slug": "capital-de-trabajo-y-politica-de-dividendos",
+  "title": "Capital de Trabajo y Política de Dividendos",
+  "subtitle": "Ciclo de conversión de efectivo, gestión de liquidez operativa y distribución de caja: dividendos vs. recompras",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Caps. 16 y 30)",
+    "Ross, Westerfield & Jaffe - Finanzas Corporativas (Caps. 19 y 26)",
+    "Berk & DeMarzo - Corporate Finance (Caps. 17 y 26)",
+    "McKinsey & Company - Valuation (Gestión de Capital Invertido)"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "Tanto en una PyME o empresa familiar como en una multinacional, una causa clásica de quiebra es 'morir de éxito': vender cada vez más mientras la caja se evapora atrapada en inventarios y cuentas por cobrar. Dominar el Capital de Trabajo Neto (NWC) libera liquidez inmediata y eleva el ROIC sin invertir en nuevas fábricas. Del otro lado, cuando el negocio madura y genera caja excedente por encima de sus proyectos con VAN positivo, el CFO debe decidir cuánto y cómo devolver al accionista (dividendos en efectivo o recompras) sin asfixiar la solvencia.",
+    "concepts": [
+      {
+        "title": "Capital de Trabajo Neto (NWC) y Ciclo de Conversión de Efectivo (CCE)",
+        "explanation": "El NWC operativo mide el dinero neto inmovilizado en el giro comercial diario: Inventarios más Cuentas por Cobrar menos Cuentas por Pagar a proveedores. El Ciclo de Conversión de Efectivo (CCE) expresa esa necesidad en días: cuántos días pasan desde que pagás la mercadería hasta que cobrás la venta. Reducir el CCE libera caja inmediata y achica el Capital Invertido (IC), impulsando el EVA.",
+        "formula_latex": "NWC = \\text{Cuentas por Cobrar} + \\text{Inventarios} - \\text{Cuentas por Pagar} \\quad ; \\quad CCE = DIO + DSO - DPO",
+        "variables_legend": [
+          { "symbol": "DIO", "meaning": "Días promedio de inventario (Days Inventory Outstanding)" },
+          { "symbol": "DSO", "meaning": "Días promedio de cobranza a clientes (Days Sales Outstanding)" },
+          { "symbol": "DPO", "meaning": "Días promedio de pago a proveedores (Days Payable Outstanding)" }
+        ],
+        "common_pitfall": "Celebrar récords de facturación financiando a clientes a 90 días mientras se paga a proveedores al contado, generando un déficit crónico de Flujo de Caja Libre."
+      },
+      {
+        "title": "La Trampa de la Iliquidez por Crecimiento Acelerado (Overtrading)",
+        "explanation": "Cada peso adicional de ventas suele requerir más inventario y crédito comercial (ΔNWC > 0). Como ΔNWC resta directamente en el FCFF, crecer muy rápido sin reservas líquidas o líneas de financiamiento adecuadas puede vaciar la cuenta bancaria incluso mostrando utilidades contables positivas en el Estado de Resultados.",
+        "formula_latex": "\\Delta\\text{Caja operativa} = NOPAT + D\\&A - Capex - \\Delta NWC",
+        "variables_legend": [
+          { "symbol": "\\Delta NWC", "meaning": "Variación del NWC: si sube consume caja; si baja libera caja hacia el FCFF" },
+          { "symbol": "D\\&A", "meaning": "Depreciación y Amortización del período" }
+        ],
+        "common_pitfall": "Confundir utilidad contable positiva con liquidez disponible para pagar sueldos, impuestos o vencimientos bancarios."
+      },
+      {
+        "title": "Política de Dividendos e Irrelevancia (Modigliani-Miller)",
+        "explanation": "En mercados perfectos sin impuestos ni fricciones, Modigliani-Miller demostraron que repartir dividendos no crea ni destruye valor: el accionista recibe efectivo pero la acción cae en la misma proporción el día ex-dividendo. En el mundo real, sin embargo, los dividendos funcionan como señal de solidez y como mecanismo disciplinador para evitar que la gerencia malgaste caja ociosa en proyectos con ROIC < WACC.",
+        "formula_latex": "\\text{Payout Ratio} = \\frac{\\text{Dividendos}}{\\text{Utilidad Neta}} \\quad ; \\quad \\text{Retención } (b) = 1 - \\text{Payout Ratio}",
+        "variables_legend": [
+          { "symbol": "\\text{Payout Ratio}", "meaning": "Proporción de la utilidad neta distribuida en efectivo a los accionistas" },
+          { "symbol": "b", "meaning": "Tasa de retención de utilidades para reinvertir en la firma" }
+        ],
+        "common_pitfall": "Pagar dividendos agresivos tomando deuda cara o en zona de estrés financiero (cobertura baja), comprometiendo la supervivencia operativa."
+      },
+      {
+        "title": "Dividendos en Efectivo vs. Recompra de Acciones (Share Buybacks)",
+        "explanation": "Cuando sobra caja luego de financiar todos los proyectos con VAN > 0, existen dos vías de retorno: dividendos regulares o recompra de acciones. Los dividendos crean un compromiso implícito rígido (recortarlos castiga fuerte la cotización por señalización negativa), mientras que las recompras permiten devolver excedentes extraordinarios con mayor flexibilidad y, en muchos países, menor carga fiscal.",
+        "formula_latex": "\\Delta\\text{Caja neta} = \\text{Utilidad Neta} + D\\&A - Capex - \\Delta NWC + \\Delta D + \\Delta E - \\text{Dividendos}",
+        "variables_legend": [
+          { "symbol": "\\Delta D", "meaning": "Nueva deuda neta tomada (o negativa si se precancela deuda)" },
+          { "symbol": "\\Delta E", "meaning": "Emisión de acciones (positiva) o recompra de acciones (negativa)" }
+        ],
+        "common_pitfall": "Recortar inversiones con alto VAN positivo únicamente para sostener un dividendo histórico rígido."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Optimización del Ciclo de Conversión de Efectivo — Distribuidora del Centro S.A.",
+      "given_data": [
+        { "label": "Ventas anuales", "value": "$3.650.000 ($10.000 por día)" },
+        { "label": "Costo de Mercadería (COGS) anual", "value": "$2.555.000 ($7.000 por día)" },
+        { "label": "Ciclo actual", "value": "DIO = 60 días | DSO = 45 días | DPO = 30 días" },
+        { "label": "Meta operativa del CFO", "value": "Bajar DIO a 40 días y DSO a 35 días (manteniendo DPO = 30 días)" },
+        { "label": "WACC anual", "value": "10,0%" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Calcular el CCE y el Capital de Trabajo (NWC) actuales",
+          "calculation": "CCE_0 = 60 + 45 - 30 = 75 días ; NWC_0 = (60*7.000) + (45*10.000) - (30*7.000) = 420.000 + 450.000 - 210.000",
+          "result": "CCE = 75 días | NWC = $660.000"
+        },
+        {
+          "step_number": 2,
+          "description": "Calcular el CCE y el NWC objetivo tras la mejora operativa",
+          "calculation": "CCE_1 = 40 + 35 - 30 = 45 días ; NWC_1 = (40*7.000) + (35*10.000) - (30*7.000) = 280.000 + 350.000 - 210.000",
+          "result": "CCE = 45 días | NWC = $420.000"
+        },
+        {
+          "step_number": 3,
+          "description": "Determinar la caja liberada en el FCFF por la reducción de NWC",
+          "calculation": "ΔNWC = 420.000 - 660.000 = -$240.000 (como ΔNWC resta en FCFF, libera +$240.000 de caja)",
+          "result": "+$240.000 de caja inmediata"
+        },
+        {
+          "step_number": 4,
+          "description": "Medir el impacto anual permanente en la creación de valor (EVA)",
+          "calculation": "Ahorro de cargo de capital = $240.000 * WACC (10,0%)",
+          "result": "+$24.000 / año de EVA adicional"
+        }
+      ],
+      "final_conclusion": "Al acortar el ciclo de efectivo en 30 días sin perder ventas, el CFO libera $240.000 líquidos (útiles para cancelar deuda cara o repartir dividendos sostenibles) y mejora el EVA en $24.000 anuales de forma permanente."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m5_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Por qué una empresa rentable que duplica sus ventas de un año a otro puede quedarse sin efectivo y entrar en cesación de pagos ('overtrading')?",
+      "hint": "Pensá en la relación entre crecimiento de ventas, ΔNWC y el signo de ΔNWC en el FCFF.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque vender más obliga a comprar más inventario por adelantado y financiar cuentas por cobrar antes de percibir el efectivo (ΔNWC > 0). Si el consumo de caja por ΔNWC y Capex supera al NOPAT + D&A, el FCFF se vuelve fuertemente negativo aunque el Estado de Resultados muestre ganancias récord.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 30"
+    },
+    {
+      "card_id": "m5_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Según la teoría de costos de agencia, ¿por qué los accionistas de una empresa madura suelen valorar que el CFO reparta el exceso de caja en dividendos o recompras?",
+      "hint": "Pensá qué suele ocurrir cuando una gerencia acumula montañas de caja ociosa sin proyectos de alto VAN.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque devolver la caja excedente reduce la tentación de los directivos de 'construir imperios' (empire building), evitando que inviertan en adquisiciones caras o proyectos mediocres con ROIC < WACC solo por hacer crecer el tamaño de la compañía.",
+      "source_reference": "Berk & DeMarzo - Cap. 17"
+    },
+    {
+      "card_id": "m5_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "¿Qué significa que un supermercado o una empresa SaaS con cobro anual anticipado opere con un Ciclo de Conversión de Efectivo (CCE) negativo?",
+      "hint": "Recordá la fórmula CCE = DIO + DSO - DPO.",
+      "options": [
+        "A) Que la empresa vende a pérdida en cada transacción comercial.",
+        "B) Que cobra a sus clientes (o rota stock) antes de tener que pagar a sus proveedores, financiando su operación con capital de terceros sin costo.",
+        "C) Que sus cuentas por cobrar tardan más días en cobrarse que la rotación de inventario.",
+        "D) Que tiene prohibido legalmente distribuir dividendos en efectivo."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Un CCE negativo ocurre cuando DPO > (DIO + DSO). La firma cobra el efectivo antes de pagar sus costos, generando un Capital de Trabajo Neto negativo que aporta caja adicional cada vez que aumentan las ventas.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 26"
+    },
+    {
+      "card_id": "m5_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Bajo los supuestos ideales de Modigliani-Miller (sin impuestos ni fricciones, con política de inversiones fija), si una empresa paga un dividendo de $2,00 por acción, ¿qué ocurre con la riqueza total del accionista el día ex-dividendo?",
+      "hint": "Pensá en la suma de efectivo recibido más el nuevo valor teórico de la acción.",
+      "options": [
+        "A) Su riqueza total aumenta automáticamente en $2,00 por acción.",
+        "B) Su riqueza total cae en $2,00 porque sale dinero de la empresa.",
+        "C) Permanece neutra: recibe $2,00 en efectivo y el precio teórico de la acción ajusta a la baja en $2,00.",
+        "D) El WACC de la firma cae permanentemente en la proporción del dividendo."
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Al salir $2,00 por acción de la caja corporativa, el valor fundamental por acción baja en $2,00 en la fecha ex-dividendo. El accionista simplemente cambió $2,00 de valor en acciones por $2,00 en efectivo, manteniendo idéntica riqueza total.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 16"
+    },
+    {
+      "card_id": "m5_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "¿Por qué muchos CFOs prefieren usar Recompras de Acciones en lugar de subir el Dividendo Regular cuando quieren distribuir un excedente de caja extraordinario y no recurrente?",
+      "hint": "Analizá el efecto de 'señalización' ante los mercados si en el futuro la caja vuelve a niveles normales.",
+      "options": [
+        "A) Porque el mercado castiga severamente cualquier recorte futuro del dividendo regular (señal negativa), mientras que una recompra devuelve caja puntual sin crear una expectativa rígida.",
+        "B) Porque las recompras de acciones aumentan directamente el NOPAT operativo del Estado de Resultados.",
+        "C) Porque pagar dividendos eleva automáticamente la Beta desapalancada del sector.",
+        "D) Porque las recompras de acciones son deducibles del impuesto a las ganancias igual que los intereses."
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Los inversores interpretan un aumento del dividendo regular como un compromiso permanente de mayores flujos futuros; si luego hay que recortarlo, el precio se desploma. Las recompras ofrecen flexibilidad para retornar excedentes transitorios.",
+      "source_reference": "Berk & DeMarzo - Cap. 17"
+    },
+    {
+      "card_id": "m5_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Un distribuidor mayorista mantiene su inventario en promedio durante 52 días (DIO), cobra a sus clientes a 38 días (DSO) y paga a sus proveedores a 45 días (DPO). ¿Cuál es su Ciclo de Conversión de Efectivo (CCE)?",
+      "hint": "Aplicá CCE = DIO + DSO - DPO.",
+      "options": [
+        "A) 135 días",
+        "B) 59 días",
+        "C) 31 días",
+        "D) 45 días"
+      ],
+      "correct_option_index": 3,
+      "back_explanation": "CCE = DIO (52) + DSO (38) - DPO (45) = 90 - 45 = 45 días. La empresa debe financiar con capital propio o deuda bancaria 45 días de su ciclo comercial.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 26"
+    },
+    {
+      "card_id": "m5_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Al inicio del trimestre tu NWC era $300.000. Durante el trimestre generaste NOPAT = $90.000, D&A = $20.000 y ejecutaste Capex = $25.000. Gracias a mejores acuerdos con proveedores, cerraste el trimestre con un NWC de $250.000. ¿Cuál fue el FCFF del trimestre?",
+      "hint": "Calculá ΔNWC = NWC_final - NWC_inicial (con su signo) y recordá que en FCFF se resta ΔNWC.",
+      "options": [
+        "A) $35.000",
+        "B) $135.000",
+        "C) $85.000",
+        "D) -$165.000"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "ΔNWC = $250.000 - $300.000 = -$50.000 (se liberaron $50.000 de capital de trabajo). Aplicando la fórmula: FCFF = NOPAT ($90.000) + D&A ($20.000) - Capex ($25.000) - (-$50.000) = $85.000 + $50.000 = $135.000.",
+      "source_reference": "McKinsey & Company - Valuation"
+    },
+    {
+      "card_id": "m5_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "En el trimestre, la empresa obtiene Utilidad Neta = $400.000, D&A = $50.000, Capex = $100.000 y ΔNWC = +$30.000. Sin tomar nueva deuda ni emitir acciones, el directorio aprueba distribuir un Dividend Payout Ratio del 30% de la Utilidad Neta. ¿Cuál es la variación neta de Caja (ΔCaja) del trimestre?",
+      "hint": "Calculá los dividendos (30% de $400.000) y aplicá la ecuación exacta de flujo neto de caja real.",
+      "options": [
+        "A) +$150.000",
+        "B) +$320.000",
+        "C) +$200.000",
+        "D) +$260.000"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Paso 1: Dividendos = $400.000 * 0,30 = $120.000. Paso 2: ΔCaja = Utilidad Neta ($400.000) + D&A ($50.000) - Capex ($100.000) - ΔNWC ($30.000) - Dividendos ($120.000) = +$200.000.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 16"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_5",
+    "case_title": "Crecimiento sin Asfixia de Caja y Política de Dividendos",
+    "company_name": "Distribuidora del Centro S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Tu empresa crece en ventas pero sufre presión de Capital de Trabajo y pedidos de dividendos de los accionistas. En 3 trimestres deberás liberar NWC improductivo, distribuir dividendos sostenibles sin caer en sobregiros y cerrar con EVA positivo."
+  }
+}

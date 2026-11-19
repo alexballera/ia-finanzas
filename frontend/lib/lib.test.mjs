@@ -112,6 +112,7 @@ test("el CSV del historial lleva BOM, encabezado y escapa comas y valores nulos"
     roic_annualized: 0.21,
     eva_annualized: 2272,
     emergency_debt: 0,
+    dividends: 25,
     game_status: "ACTIVE",
   };
   const csv = buildHistoryCsv([entry, { ...entry, quarter: 2, selected_project_id: 'P01, "A"' }]);
@@ -119,11 +120,11 @@ test("el CSV del historial lleva BOM, encabezado y escapa comas y valores nulos"
 
   assert.equal(csv.charCodeAt(0), 0xfeff);
   assert.equal(lines.length, 4);
-  assert.equal(lines[0].slice(1).split(",").length, 18);
+  assert.equal(lines[0].slice(1).split(",").length, 19);
   assert.ok(lines[0].slice(1).startsWith("quarter,selected_project_id,financing_option,shock_id,"));
   assert.equal(
     lines[1],
-    "1,,,RF_HIKE,12000,2000.123457,987,-1950.5,0,6000,15500,16.666667,AAA/A,0.0964,0.21,2272,0,ACTIVE",
+    "1,,,RF_HIKE,12000,2000.123457,987,-1950.5,0,6000,15500,16.666667,AAA/A,0.0964,0.21,2272,0,25,ACTIVE",
   );
   assert.ok(lines[2].startsWith('2,"P01, ""A""",,RF_HIKE,'));
   assert.equal(

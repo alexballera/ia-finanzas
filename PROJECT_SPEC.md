@@ -2,7 +2,7 @@
 
 ## 1. Visión General y Arquitectura
 Aplicación educativa de Finanzas Corporativas (sin base de datos; persistencia en `localStorage` del navegador) estructurada en:
-- **3 Módulos Progresivos**, cada uno con 3 Fases:
+- **6 Módulos Progresivos**, cada uno con 3 Fases:
   - Fase 1: Teoría Condensada (consumida desde `frontend/data/module_X.json`)
   - Fase 2: Flashcards y Quizzes de cálculo (consumida desde `frontend/data/module_X.json`)
   - Fase 3: Simulación de Caso Real (3 trimestres) impulsada por Backend Python + Gemini AI
@@ -14,6 +14,33 @@ Aplicación educativa de Finanzas Corporativas (sin base de datos; persistencia 
 - `vercel.json` en la raíz enruta `/api/:path*` al servicio `backend` (`main:app`) y `/(.*)` al servicio `frontend`.
 - **Regla de rutas:** Vercel Services reenvía el path original al backend, por lo que todos los endpoints de FastAPI DEBEN llevar prefijo `/api/...` (ej. `/api/health`, `/api/simulation/init`, `/api/simulation/step`).
 - **Desarrollo local:** `frontend/next.config.ts` debe incluir un `rewrite` en `NODE_ENV === "development"` de `/api/:path*` hacia `http://127.0.0.1:8000/api/:path*` para evitar problemas de CORS al correr `uvicorn` y `next dev` en paralelo.
+
+---
+
+## 3. Alcance V2 Pre-Entrega
+
+La segunda etapa aprobada para la pre-entrega se divide en cuatro bloques. Cada bloque se considera aprobado únicamente cuando sus criterios se implementen y verifiquen; el estado se registra en `features.json`.
+
+### T1 — Integración de Módulos 4, 5 y 6
+- Incorporar el contenido curricular de `module_4.json`, `module_5.json` y `module_6.json` como módulos activos con Fases 1, 2 y 3.
+- Habilitar sus escenarios deterministas de tres trimestres: `sim_mod_4` (valuación y volatilidad de tasas), `sim_mod_5` (liberación de NWC y dividendos sostenibles) y `sim_mod_6` (M&A, sinergias y disciplina de VAN).
+- En el Módulo 5 y en el simulador final, ofrecer un selector discreto de dividendos trimestrales, con restricciones de liquidez y cobertura calculadas por el motor financiero.
+- Desbloquear progresivamente los seis módulos y el Simulador Final; el Modo Docente / Demo conserva el acceso libre.
+- Criterio de aceptación: sensores de JSON/KaTeX, backend, TypeScript, lint, tests y build en verde. Solo entonces T1 puede pasar a `"pasa"`.
+
+### T2 — Tutor CFO IA contextual
+- Implementar `POST /api/tutor/chat` en FastAPI y el componente `<AITutorDrawer />`.
+- El tutor debe usar el módulo, fase, escenario y estado financiero activos como contexto, manteniendo a Python como único responsable de los cálculos.
+- Preservar el fallback cuando Gemini no esté disponible y los prefijos `/api/` requeridos por Vercel Services.
+
+### T3 — Landing ejecutiva y currículo
+- Crear una landing ejecutiva en `/` con propuesta de valor racional y emocional: aprendizaje aplicable, logro y reconocimiento en corporaciones, PyMEs y empresas familiares.
+- Comunicar el modelo B2C/B2B y el Roadmap Track II sin presentar funcionalidades futuras como existentes.
+- Mover el Mapa Curricular a `/curriculum` y mantener las rutas de módulos, la navegación y el acceso al simulador final consistentes.
+
+### T4 — Documentación final
+- Completar `README.md` con alcance, arquitectura, uso local y despliegue.
+- Preparar un Resumen Ejecutivo de menos de una página, adecuado para la entrega académica.
 
 ---
 

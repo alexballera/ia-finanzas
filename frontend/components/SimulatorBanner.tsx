@@ -64,7 +64,7 @@ export function SimulatorBanner() {
               : `${completedModules} de ${MODULE_IDS.length} módulos completos`}
             {!unlocked && (
               <span className="block">
-                Se habilita al completar los 3 módulos o con el Modo Docente / Demo.
+                Se habilita al completar los 6 módulos o con el Modo Docente / Demo.
               </span>
             )}
           </p>

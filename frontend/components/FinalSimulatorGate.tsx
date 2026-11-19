@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { CFOSimulator } from "./simulator/CFOSimulator";
 import { Panel, buttonStyles } from "./ui";
 
-/** Simulador final: se habilita con los 3 módulos completos o con el Modo Docente / Demo. */
+/** Simulador final: se habilita con los 6 módulos completos o con el Modo Docente / Demo. */
 export function FinalSimulatorGate() {
   const state = useAppState();
   const hydrated = useHydrated();
@@ -24,7 +24,7 @@ export function FinalSimulatorGate() {
         <Lock className="mx-auto h-8 w-8 text-slate-500" aria-hidden />
         <h2 className="mt-4 text-lg font-semibold text-white">Simulador final bloqueado</h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
-          Se habilita al completar los 3 módulos (teoría, práctica y simulación ganada), o al
+          Se habilita al completar los 6 módulos (teoría, práctica y simulación ganada), o al
           activar el Modo Docente / Demo en la barra superior.
         </p>
         <Link href="/" className={cn(buttonStyles.secondary, "mt-5")}>

@@ -1,20 +1,29 @@
 "use client";
 
 import { Ban, LoaderCircle, Play, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { describeApiError, previewDividends } from "@/lib/api";
 import {
+  formatMultiple,
   formatPercent,
   formatSignedThousandsUsd,
   formatThousandsUsd,
 } from "@/lib/format";
-import type { FinancingOption, ProjectCard } from "@/lib/types";
+import type {
+  CompanyState,
+  DividendPreviewResponse,
+  FinancingOption,
+  ProjectCard,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { Badge, Panel, buttonStyles } from "../ui";
 import { CATEGORY_LABELS, FINANCING_LABELS, FINANCING_ORDER } from "./labels";
 
 const NO_PROJECT = "__none__";
+const DIVIDEND_OPTIONS = [0, 25, 50] as const;
+const CRITICAL_COVERAGE = 1.5;
 
 interface FinancingChoice {
   option: FinancingOption;
@@ -153,6 +162,8 @@ export function DecisionPanel({
   quarter,
   offeredProjects,
   debt100Blocked,
+  state,
+  showDividendSelector,
   pending,
   error,
   onExecute,
@@ -161,29 +172,93 @@ export function DecisionPanel({
   quarter: number;
   offeredProjects: readonly ProjectCard[];
   debt100Blocked: boolean;
+  state: CompanyState;
+  showDividendSelector: boolean;
   pending: boolean;
   error: string | null;
-  onExecute: (projectId: string | null, financingOption: FinancingOption) => void;
+  onExecute: (
+    projectId: string | null,
+    financingOption: FinancingOption,
+    dividends: number,
+  ) => void;
 }) {
   const [choice, setChoice] = useState<string | null>(null);
   const [financing, setFinancing] = useState<FinancingOption | null>(null);
+  const [dividends, setDividends] = useState<number>(0);
+  const [previewResult, setPreviewResult] = useState<{
+    key: string;
+    preview?: DividendPreviewResponse;
+    error?: string;
+  } | null>(null);
 
   const selectedCard = offeredProjects.find((card) => card.project_id === choice);
   const choices = selectedCard ? financingChoices(selectedCard, debt100Blocked) : [];
+  const selectedProjectId = selectedCard?.project_id ?? null;
+  const previewFinancing = selectedCard ? (financing ?? "CASH_100") : "CASH_100";
+  const previewKey = [
+    state.meta.scenario_id,
+    state.meta.current_quarter,
+    state.balance_sheet.cash,
+    selectedProjectId ?? "",
+    previewFinancing,
+  ].join(":");
+
+  useEffect(() => {
+    if (!showDividendSelector || choice === null) {
+      return;
+    }
+
+    let cancelled = false;
+    previewDividends({
+      state,
+      selected_project_id: selectedProjectId,
+      financing_option: previewFinancing,
+    })
+      .then((preview) => {
+        if (!cancelled) {
+          setPreviewResult({ key: previewKey, preview });
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) {
+          setPreviewResult({ key: previewKey, error: describeApiError(cause) });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [choice, previewFinancing, previewKey, selectedProjectId, showDividendSelector, state]);
+
+  const currentPreviewResult = previewResult?.key === previewKey ? previewResult : null;
+  const dividendPreview = currentPreviewResult?.preview ?? null;
+  const previewError = currentPreviewResult?.error ?? null;
+  const previewLoading =
+    showDividendSelector && choice !== null && currentPreviewResult === null;
+
+  const selectedDividendUnavailable =
+    dividends > 0 &&
+    (previewLoading ||
+      dividendPreview === null ||
+      dividendPreview.projected_cash_before_dividends < dividends ||
+      dividendPreview.projected_interest_coverage < CRITICAL_COVERAGE);
   const canExecute =
-    !pending && (choice === NO_PROJECT || (selectedCard !== undefined && financing !== null));
+    !pending &&
+    !selectedDividendUnavailable &&
+    (choice === NO_PROJECT || (selectedCard !== undefined && financing !== null));
 
   function selectProject(card: ProjectCard) {
     setChoice(card.project_id);
+    setDividends(0);
     const firstEnabled = financingChoices(card, debt100Blocked).find((item) => !item.disabled);
     setFinancing(firstEnabled?.option ?? null);
   }
 
   function execute() {
     if (choice === NO_PROJECT) {
-      onExecute(null, "CASH_100");
+      onExecute(null, "CASH_100", dividends);
     } else if (selectedCard !== undefined && financing !== null) {
-      onExecute(selectedCard.project_id, financing);
+      onExecute(selectedCard.project_id, financing, dividends);
     }
   }
 
@@ -217,6 +292,7 @@ export function DecisionPanel({
           onClick={() => {
             setChoice(NO_PROJECT);
             setFinancing(null);
+            setDividends(0);
           }}
           className={cn(
             "flex w-full items-center gap-3 rounded-xl border p-4 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60",
@@ -272,14 +348,74 @@ export function DecisionPanel({
         </div>
       )}
 
-      {error !== null && (
+      {showDividendSelector && choice !== null && (
+        <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+          <p className="text-sm font-medium text-slate-200">Dividendos trimestrales</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Se validan contra la caja proyectada y la cobertura del trimestre, calculadas por el
+            motor financiero.
+          </p>
+          <div
+            role="radiogroup"
+            aria-label="Dividendos trimestrales"
+            className="mt-3 flex flex-wrap gap-2"
+          >
+            {DIVIDEND_OPTIONS.map((amount) => {
+              const disabled =
+                amount > 0 &&
+                (previewLoading ||
+                  dividendPreview === null ||
+                  previewError !== null ||
+                  dividendPreview.projected_cash_before_dividends < amount ||
+                  dividendPreview.projected_interest_coverage < CRITICAL_COVERAGE);
+              return (
+                <button
+                  key={amount}
+                  type="button"
+                  role="radio"
+                  aria-checked={dividends === amount}
+                  disabled={disabled || pending}
+                  onClick={() => setDividends(amount)}
+                  className={cn(
+                    "rounded-lg border px-3 py-2 text-sm font-medium tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                    dividends === amount
+                      ? "border-emerald-400 bg-emerald-500/10 text-white"
+                      : "border-slate-700 text-slate-300 hover:border-slate-500",
+                  )}
+                >
+                  {amount === 0 ? "$0k" : `$${amount}k`}
+                </button>
+              );
+            })}
+          </div>
+          {previewLoading ? (
+            <p className="mt-2 text-xs text-slate-500">Calculando caja y cobertura proyectadas…</p>
+          ) : previewError !== null ? (
+            <p role="alert" className="mt-2 text-xs text-rose-300">
+              No se pudo proyectar la decisión: {previewError}
+            </p>
+          ) : dividendPreview !== null ? (
+            <p className="mt-2 text-xs text-slate-500 tabular-nums">
+              Caja proyectada: {formatThousandsUsd(dividendPreview.projected_cash_before_dividends)}
+              {" · "}Cobertura proyectada:{" "}
+              {formatMultiple(dividendPreview.projected_interest_coverage)}
+              {dividendPreview.projected_interest_coverage < CRITICAL_COVERAGE
+                ? " · Dividendos bloqueados por cobertura crítica"
+                : ""}
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      {(error !== null || previewError !== null) && (
         <p
           role="alert"
           className="mt-5 flex items-start gap-2 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-sm text-rose-100"
         >
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-rose-300" aria-hidden />
           <span>
-            {error} La partida no se modificó: se puede corregir la decisión y volver a ejecutar.
+            {error ?? previewError} La partida no se modificó: se puede corregir la decisión y
+            volver a ejecutar.
           </span>
         </p>
       )}

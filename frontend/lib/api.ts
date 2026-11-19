@@ -4,10 +4,16 @@
  * y en producción Vercel Services las enruta al servicio `backend`.
  */
 
-import type { ScenarioId, SimulationStepResponse, StepSimulationRequest } from "./types";
+import type {
+  DividendPreviewRequest,
+  DividendPreviewResponse,
+  ScenarioId,
+  SimulationStepResponse,
+  StepSimulationRequest,
+} from "./types";
 import { isRecord, isSimulationStepResponse } from "./validation";
 
-// Margen para el turno más lento: carga en frío del SDK de Gemini más su timeout de 15 s.
+// Margen para el turno más lento: carga en frío del SDK de Gemini más su timeout de 30 s.
 // Debe quedar por debajo de `experimental.proxyTimeout` en next.config.ts.
 const REQUEST_TIMEOUT_MS = 60_000;
 
@@ -40,7 +46,7 @@ function readDetail(body: unknown): string | null {
   return null;
 }
 
-async function postSimulation(path: string, payload: unknown): Promise<SimulationStepResponse> {
+async function postJson(path: string, payload: unknown): Promise<unknown> {
   let response: Response;
   try {
     response = await fetch(path, {
@@ -66,8 +72,13 @@ async function postSimulation(path: string, payload: unknown): Promise<Simulatio
       response.status,
     );
   }
+  return body;
+}
+
+async function postSimulation(path: string, payload: unknown): Promise<SimulationStepResponse> {
+  const body = await postJson(path, payload);
   if (!isSimulationStepResponse(body)) {
-    throw new ApiError("El servidor de simulación devolvió una respuesta inesperada.", response.status);
+    throw new ApiError("El servidor de simulación devolvió una respuesta inesperada.", null);
   }
   return body;
 }
@@ -78,6 +89,25 @@ export function initSimulation(scenarioId: ScenarioId): Promise<SimulationStepRe
 
 export function stepSimulation(payload: StepSimulationRequest): Promise<SimulationStepResponse> {
   return postSimulation("/api/simulation/step", payload);
+}
+
+export async function previewDividends(
+  payload: DividendPreviewRequest,
+): Promise<DividendPreviewResponse> {
+  const body = await postJson("/api/simulation/preview", payload);
+  if (
+    !isRecord(body) ||
+    typeof body.projected_cash_before_dividends !== "number" ||
+    !Number.isFinite(body.projected_cash_before_dividends) ||
+    typeof body.projected_interest_coverage !== "number" ||
+    !Number.isFinite(body.projected_interest_coverage)
+  ) {
+    throw new ApiError("El servidor devolvió una proyección de dividendos inesperada.", null);
+  }
+  return {
+    projected_cash_before_dividends: body.projected_cash_before_dividends,
+    projected_interest_coverage: body.projected_interest_coverage,
+  };
 }
 
 export function describeApiError(error: unknown): string {

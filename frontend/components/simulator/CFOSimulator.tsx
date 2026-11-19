@@ -142,7 +142,11 @@ export function CFOSimulator({ scenarioId, moduleId, onModuleWon }: CFOSimulator
 
   const response = saved.response;
 
-  async function executeQuarter(projectId: string | null, financingOption: FinancingOption) {
+  async function executeQuarter(
+    projectId: string | null,
+    financingOption: FinancingOption,
+    dividends: number,
+  ) {
     setPending(true);
     setStepError(null);
     try {
@@ -150,6 +154,7 @@ export function CFOSimulator({ scenarioId, moduleId, onModuleWon }: CFOSimulator
         state: response.state,
         selected_project_id: projectId,
         financing_option: financingOption,
+        dividends,
       });
       saveSimulation(next);
       if (moduleId !== undefined && next.state.meta.game_status === "WON") {
@@ -257,7 +262,11 @@ function Cockpit({
   simulatorUnlocked: boolean;
   pending: boolean;
   stepError: string | null;
-  onExecute: (projectId: string | null, financingOption: FinancingOption) => void;
+  onExecute: (
+    projectId: string | null,
+    financingOption: FinancingOption,
+    dividends: number,
+  ) => void;
   onRestart: () => void;
 }) {
   const { state, ai_feedback: feedback } = response;
@@ -376,6 +385,8 @@ function Cockpit({
               quarter={meta.current_quarter + 1}
               offeredProjects={response.offered_projects}
               debt100Blocked={meta.debt_100_blocked}
+              state={state}
+              showDividendSelector={meta.scenario_id === "sim_mod_5" || isFinalGame}
               pending={pending}
               error={stepError}
               onExecute={onExecute}
@@ -436,9 +447,9 @@ function ClosingBanner({
   const reason = meta.end_reason !== null ? END_REASON_TEXT[meta.end_reason] : null;
 
   let nextStep: { href: string; label: string };
-  if (won && moduleId !== undefined && moduleId < 3) {
+  if (won && moduleId !== undefined && moduleId < 6) {
     nextStep = { href: `/modules/${moduleId + 1}`, label: `Ir al Módulo ${moduleId + 1}` };
-  } else if (won && moduleId === 3 && simulatorUnlocked) {
+  } else if (won && moduleId === 6 && simulatorUnlocked) {
     nextStep = { href: "/simulator", label: "Ir al Simulador Final" };
   } else {
     nextStep = { href: "/", label: "Volver al Mapa Curricular" };

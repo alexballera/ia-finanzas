@@ -278,6 +278,17 @@ def test_irr_is_omitted_for_non_conventional_flows():
     assert nwc_release.projected_irr is None
 
 
+def test_project_cash_flows_do_not_create_tax_shields_from_negative_ebit():
+    card = PROJECT_CATALOG["P14_MA_OVERPRICE"]
+
+    flows = engine.project_incremental_cash_flows(card, corporate_tax_rate=0.30)
+
+    depreciation = card.capex / card.duration_quarters
+    incremental_ebit = card.ebitda_boost_q - depreciation
+    assert incremental_ebit < 0
+    assert flows[1] == pytest.approx(incremental_ebit + depreciation)
+
+
 def test_active_project_lifecycle():
     config = SCENARIOS[ScenarioId.FINAL_GAME].model_copy(
         update={"mode": SimulationMode.PHASE_3, "shock_schedule": {}, "goal": None}
@@ -439,6 +450,27 @@ def test_cash_deficit_with_credit_capacity_takes_emergency_overdraft():
     )
 
 
+def test_dividends_are_limited_by_projected_cash_and_critical_coverage():
+    opening = engine.init_simulation(ScenarioId.SIM_MOD_5)
+    no_dividend = engine.step_simulation(opening.state)
+    paid = engine.step_simulation(opening.state, dividends=25.0)
+
+    assert paid.state.cash_flow_q.dividends == 25.0
+    assert paid.state.history_summary[-1].dividends == 25.0
+    assert paid.state.meta.cumulative_dividends == 25.0
+    assert paid.state.balance_sheet.cash == pytest.approx(
+        no_dividend.state.balance_sheet.cash - 25.0
+    )
+    assert abs(engine.balance_gap(paid.state.balance_sheet)) < 1e-4
+
+    with pytest.raises(engine.InvalidDecisionError, match="caja proyectada"):
+        engine.step_simulation(opening.state, dividends=no_dividend.state.balance_sheet.cash + 1)
+
+    stressed = engine.init_simulation(ScenarioId.SIM_MOD_3)
+    with pytest.raises(engine.InvalidDecisionError, match="zona CCC"):
+        engine.step_simulation(stressed.state, dividends=1.0)
+
+
 # --- Escenarios --------------------------------------------------------------
 
 
@@ -518,6 +550,84 @@ def test_module_scenarios_are_won_by_sound_decisions_and_lost_by_inaction(
     assert won.meta.end_reason is EndReason.GOAL_ACHIEVED
     assert idle.meta.game_status is GameStatus.GAME_OVER
     assert idle.meta.end_reason is EndReason.OBJECTIVE_NOT_MET
+
+
+@pytest.mark.parametrize(
+    ("scenario_id", "winning_decisions"),
+    [
+        (
+            ScenarioId.SIM_MOD_4,
+            [
+                ("P16_RATE_RESILIENT_LINE", FinancingOption.CASH_100),
+                SKIP,
+                SKIP,
+            ],
+        ),
+        (
+            ScenarioId.SIM_MOD_5,
+            [
+                ("P17_NWC_CYCLE_RELEASE", FinancingOption.CASH_100, 25.0),
+                (None, FinancingOption.CASH_100, 25.0),
+                (None, FinancingOption.CASH_100, 25.0),
+            ],
+        ),
+        (
+            ScenarioId.SIM_MOD_6,
+            [
+                ("P13_MA_SYNERGY", FinancingOption.CASH_100),
+                ("P15_MA_PLATFORM_SYNERGY", FinancingOption.EQUITY_100),
+                SKIP,
+            ],
+        ),
+    ],
+)
+def test_new_module_scenarios_have_winning_paths_and_reject_inaction(
+    scenario_id, winning_decisions
+):
+    opening = engine.init_simulation(scenario_id)
+
+    def play_with_dividends(decisions):
+        state = opening.state
+        for decision in decisions:
+            if len(decision) == 3:
+                project_id, financing, dividends = decision
+            else:
+                project_id, financing = decision
+                dividends = 0.0
+            state = engine.step_simulation(state, project_id, financing, dividends).state
+        return state
+
+    won = play_with_dividends(winning_decisions)
+    idle = play_with_dividends([SKIP, SKIP, SKIP])
+
+    assert won.meta.game_status is GameStatus.WON
+    assert won.meta.end_reason is EndReason.GOAL_ACHIEVED
+    assert won.balance_sheet.cash > 0
+    assert won.meta.emergency_overdraft_count == 0
+    assert idle.meta.game_status is GameStatus.GAME_OVER
+    assert idle.meta.end_reason is EndReason.OBJECTIVE_NOT_MET
+    if scenario_id is ScenarioId.SIM_MOD_5:
+        assert won.meta.cumulative_dividends == pytest.approx(75.0)
+        assert won.valuation_and_risk_kpis.interest_coverage >= 2.5
+    elif scenario_id is ScenarioId.SIM_MOD_6:
+        assert won.meta.cumulative_approved_npv > 0
+        assert won.valuation_and_risk_kpis.eva_annualized > 0
+
+
+def test_module_6_overpriced_acquisition_is_a_losing_trap():
+    result = engine.init_simulation(ScenarioId.SIM_MOD_6)
+    card = next(card for card in result.offered_projects if card.project_id == "P14_MA_OVERPRICE")
+    assert card.projected_npv < 0
+
+    for _ in range(3):
+        result = engine.step_simulation(
+            result.state,
+            "P14_MA_OVERPRICE" if result.state.meta.current_quarter == 0 else None,
+            FinancingOption.DEBT_100,
+        )
+
+    assert result.state.meta.game_status is GameStatus.GAME_OVER
+    assert result.state.meta.cumulative_approved_npv < 0
 
 
 def test_final_game_is_winnable_within_twelve_quarters():

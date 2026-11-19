@@ -13,7 +13,7 @@ import { SCENARIO_IDS, isRecord, isSimulationStepResponse } from "./validation";
 
 const STORAGE_KEY = "ia-finanzas:state:v1";
 
-export const MODULE_IDS: readonly ModuleId[] = [1, 2, 3];
+export const MODULE_IDS: readonly ModuleId[] = [1, 2, 3, 4, 5, 6];
 
 export interface ModuleProgress {
   phase1Viewed: boolean;
@@ -52,6 +52,9 @@ function createDefaultState(): AppState {
       1: { ...EMPTY_MODULE_PROGRESS },
       2: { ...EMPTY_MODULE_PROGRESS },
       3: { ...EMPTY_MODULE_PROGRESS },
+      4: { ...EMPTY_MODULE_PROGRESS },
+      5: { ...EMPTY_MODULE_PROGRESS },
+      6: { ...EMPTY_MODULE_PROGRESS },
     },
     simulations: {},
   };

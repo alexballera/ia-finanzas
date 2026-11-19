@@ -10,6 +10,9 @@ export const SCENARIO_IDS: readonly ScenarioId[] = [
   "sim_mod_1",
   "sim_mod_2",
   "sim_mod_3",
+  "sim_mod_4",
+  "sim_mod_5",
+  "sim_mod_6",
   "final_game",
 ];
 
@@ -122,6 +125,7 @@ function isMeta(value: unknown, scenarioId: ScenarioId | undefined): boolean {
   return (
     hasStrings(value, ["company_name", "case_title", "mission_objective"]) &&
     hasNumbers(value, ["current_quarter", "max_quarters", "consecutive_positive_eva_turns"]) &&
+    (value.cumulative_dividends === undefined || isNumber(value.cumulative_dividends)) &&
     isOneOf(value.scenario_id, SCENARIO_IDS) &&
     (scenarioId === undefined || value.scenario_id === scenarioId) &&
     isOneOf(value.mode, ["PHASE_3", "FINAL_GAME"]) &&
@@ -159,6 +163,7 @@ function isState(value: unknown, scenarioId: ScenarioId | undefined): boolean {
       value.history_summary,
       (item) =>
         hasNumbers(item, HISTORY_NUMBER_KEYS) &&
+        (item.dividends === undefined || isNumber(item.dividends)) &&
         isOneOf(item.credit_rating, CREDIT_RATINGS) &&
         isOneOf(item.game_status, GAME_STATUSES),
     )

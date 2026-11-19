@@ -23,11 +23,12 @@ const COLUMNS: readonly (keyof HistoryEntry)[] = [
   "roic_annualized",
   "eva_annualized",
   "emergency_debt",
+  "dividends",
   "game_status",
 ];
 
-function toCell(value: string | number | null): string {
-  if (value === null) {
+function toCell(value: string | number | null | undefined): string {
+  if (value == null) {
     return "";
   }
   if (typeof value === "number") {
@@ -41,7 +42,11 @@ function toCell(value: string | number | null): string {
 export function buildHistoryCsv(history: readonly HistoryEntry[]): string {
   const rows = [
     COLUMNS.join(","),
-    ...history.map((entry) => COLUMNS.map((column) => toCell(entry[column])).join(",")),
+    ...history.map((entry) =>
+      COLUMNS.map((column) =>
+        column === "dividends" ? toCell(entry.dividends) : toCell(entry[column]),
+      ).join(","),
+    ),
   ];
   return `${BOM}${rows.join("\r\n")}\r\n`;
 }

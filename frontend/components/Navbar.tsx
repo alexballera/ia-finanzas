@@ -17,7 +17,8 @@ export function Navbar() {
   const [confirmingReset, setConfirmingReset] = useState(false);
 
   const simulatorUnlocked = isSimulatorUnlocked(state);
-  const onCurriculum = pathname === "/" || pathname.startsWith("/modules");
+  const onCurriculum =
+    pathname === "/" || pathname === "/curriculum" || pathname.startsWith("/modules");
   const onSimulator = pathname.startsWith("/simulator");
 
   return (

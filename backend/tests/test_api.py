@@ -79,6 +79,9 @@ def test_importing_the_app_does_not_load_the_gemini_sdk():
         ("sim_mod_1", "Metalúrgica Austral S.A.", 3),
         ("sim_mod_2", "Energía Pampeana S.A.", 3),
         ("sim_mod_3", "Textil Cordillerana S.A.", 3),
+        ("sim_mod_4", "Lácteos del Litoral S.A.", 3),
+        ("sim_mod_5", "Distribuidora del Centro S.A.", 3),
+        ("sim_mod_6", "Grupo Andino S.A.", 3),
         ("final_game", "Andes Tech S.A.", 12),
     ],
 )
@@ -145,6 +148,70 @@ def test_step_rejects_finished_simulation():
     response = client.post("/api/simulation/step", json={"state": state})
 
     assert response.status_code == 409
+
+
+def test_dividend_preview_matches_the_engine_and_step_records_distribution():
+    opening = _init("sim_mod_5")
+    preview = client.post(
+        "/api/simulation/preview",
+        json={
+            "state": opening["state"],
+            "selected_project_id": "P17_NWC_CYCLE_RELEASE",
+            "financing_option": "CASH_100",
+        },
+    )
+    assert preview.status_code == 200
+
+    step = client.post(
+        "/api/simulation/step",
+        json={
+            "state": opening["state"],
+            "selected_project_id": "P17_NWC_CYCLE_RELEASE",
+            "financing_option": "CASH_100",
+            "dividends": 25.0,
+        },
+    )
+    assert step.status_code == 200
+    body = step.json()
+    assert body["state"]["balance_sheet"]["cash"] == pytest.approx(
+        preview.json()["projected_cash_before_dividends"] - 25.0
+    )
+    assert body["state"]["cash_flow_q"]["dividends"] == 25.0
+    assert body["state"]["history_summary"][0]["dividends"] == 25.0
+    assert body["state"]["meta"]["cumulative_dividends"] == 25.0
+
+
+def test_dividend_preview_and_step_reject_critical_coverage_and_unsafe_distribution():
+    stressed = _init("sim_mod_3")
+    blocked = client.post(
+        "/api/simulation/step",
+        json={"state": stressed["state"], "dividends": 1.0},
+    )
+    assert blocked.status_code == 422
+    assert "zona CCC" in blocked.json()["detail"]
+
+    opening = _init("sim_mod_5")
+    preview = client.post(
+        "/api/simulation/preview",
+        json={
+            "state": opening["state"],
+            "selected_project_id": "P04_PREMIUM_LINE",
+            "financing_option": "CASH_100",
+        },
+    )
+    assert preview.status_code == 200
+    assert preview.json()["projected_cash_before_dividends"] <= 25.0
+    rejected = client.post(
+        "/api/simulation/step",
+        json={
+            "state": opening["state"],
+            "selected_project_id": "P04_PREMIUM_LINE",
+            "financing_option": "CASH_100",
+            "dividends": 50.0,
+        },
+    )
+    assert rejected.status_code == 422
+    assert "caja proyectada" in rejected.json()["detail"]
 
 
 # --- Feedback del Directorio (Gemini con fallback determinista) --------------

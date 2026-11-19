@@ -1,0 +1,226 @@
+{
+  "module_id": 4,
+  "slug": "valuacion-de-bonos-y-acciones",
+  "title": "Valuación de Bonos y Acciones",
+  "subtitle": "Precio de deuda corporativa, YTM, riesgo de tasa (Duration) y valuación de acciones por DDM y FCFF",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Caps. 3 y 4)",
+    "Ross, Westerfield & Jaffe - Finanzas Corporativas (Caps. 8 y 9)",
+    "Berk & DeMarzo - Corporate Finance (Caps. 6 y 9)",
+    "Damodaran - Applied Corporate Finance / Investment Valuation"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "Para liderar las decisiones financieras de una corporación, una PyME o una empresa familiar, no alcanza con mirar hacia adentro: el CFO también debe saber cómo valúa el mercado los instrumentos que emite la firma. Entender el precio de los bonos y su rendimiento al vencimiento (YTM) revela cuánto cuesta realmente endeudarse hoy y qué tan sensible es esa deuda ante movimientos de tasas. A su vez, valuar acciones por descuento de dividendos (DDM) o conectando el Enterprise Value con el Patrimonio te permite traducir la estrategia operativa en valor intrínseco para los accionistas.",
+    "concepts": [
+      {
+        "title": "Valuación de Bonos y Rendimiento al Vencimiento (YTM)",
+        "explanation": "El precio teórico de un bono corporativo es el Valor Presente de sus cupones futuros más el Valor Nominal al vencimiento, descontados a la tasa exigida por el mercado para ese nivel de riesgo (YTM). Si la YTM de mercado supera a la tasa cupón del bono, el título cotiza bajo la par (a descuento); si la YTM es menor al cupón, cotiza sobre la par.",
+        "formula_latex": "P_B = \\sum_{t=1}^{N} \\frac{C}{(1 + YTM)^t} + \\frac{VN}{(1 + YTM)^N}",
+        "variables_legend": [
+          { "symbol": "P_B", "meaning": "Precio de mercado presente del bono" },
+          { "symbol": "C", "meaning": "Cupón periódico pagado por el bono (Tasa Cupón * VN)" },
+          { "symbol": "VN", "meaning": "Valor Nominal o principal devuelto al vencimiento" },
+          { "symbol": "YTM", "meaning": "Yield to Maturity (tasa interna de retorno exigida por el mercado)" }
+        ],
+        "common_pitfall": "Confundir la tasa cupón contractual de un bono emitido hace años con el costo marginal actual de endeudarse (YTM vigente)."
+      },
+      {
+        "title": "Riesgo de Tasa de Interés y Duration",
+        "explanation": "Existe una relación inversa fundamental entre tasas de interés y precios de bonos: cuando suben las tasas del mercado, los precios de los bonos ya emitidos caen. La Duration Modificada (D_mod) mide esa sensibilidad porcentual: bonos con vencimientos más largos y cupones más bajos (como los bonos cupón cero) tienen mayor Duration y sufren caídas de precio mucho más bruscas ante una suba de tasas.",
+        "formula_latex": "\\frac{\\Delta P_B}{P_B} \\approx -D_{\\text{mod}} \\times \\Delta YTM",
+        "variables_legend": [
+          { "symbol": "\\Delta P_B / P_B", "meaning": "Variación porcentual aproximada en el precio del bono" },
+          { "symbol": "D_{\\text{mod}}", "meaning": "Duration Modificada (en años)" },
+          { "symbol": "\\Delta YTM", "meaning": "Cambio en el rendimiento exigido de mercado (en puntos decimales)" }
+        ],
+        "common_pitfall": "Asumir que un bono 'seguro' sin riesgo de default no tiene riesgo de pérdida de capital si se vende antes del vencimiento cuando suben las tasas."
+      },
+      {
+        "title": "Valuación de Acciones: Modelo de Descuento de Dividendos (Gordon-Shapiro)",
+        "explanation": "Para empresas maduras con política estable de dividendos, el valor intrínseco de una acción es el valor presente de sus dividendos futuros. El modelo de crecimiento constante (Gordon-Shapiro) asume que el próximo dividendo esperado (D1) crecerá a una tasa perpetua g = ROE * b (donde b es la tasa de retención de utilidades), descontado al costo del capital propio (Ke).",
+        "formula_latex": "P_0 = \\frac{D_1}{K_e - g} \\quad ; \\quad D_1 = D_0 \\times (1 + g) \\quad ; \\quad g = ROE \\times b",
+        "variables_legend": [
+          { "symbol": "P_0", "meaning": "Precio intrínseco estimado hoy por acción" },
+          { "symbol": "D_1", "meaning": "Dividendo esperado al finalizar el próximo período" },
+          { "symbol": "K_e", "meaning": "Retorno exigido por los accionistas (CAPM)" },
+          { "symbol": "g", "meaning": "Tasa de crecimiento sostenible a perpetuidad (debe cumplir g < Ke)" }
+        ],
+        "common_pitfall": "Usar D0 (el dividendo recién pagado) en el numerador en lugar de D1, o intentar aplicar Gordon-Shapiro a empresas tecnológicas en hipercrecimiento que no pagan dividendos (g >= Ke)."
+      },
+      {
+        "title": "Del Enterprise Value (EV) al Valor por Acción",
+        "explanation": "Cuando una empresa no reparte dividendos estables (caso típico en PyMEs que reinvierten todo o startups), el CFO valúa primero el negocio operativo completo descontando los FCFF al WACC para obtener el Enterprise Value (EV). Para llegar al patrimonio de los accionistas (Equity Value), se suma la caja excedente y se resta la Deuda Financiera Total, dividiendo luego por la cantidad de acciones.",
+        "formula_latex": "V_{\\text{Equity}} = EV + \\text{Caja} - \\text{Deuda Total} \\quad ; \\quad P_0 = \\frac{V_{\\text{Equity}}}{N_{\\text{acciones}}}",
+        "variables_legend": [
+          { "symbol": "EV", "meaning": "Enterprise Value: Valor Presente de los FCFF operativos descontados al WACC" },
+          { "symbol": "V_{\\text{Equity}}", "meaning": "Valor residual total perteneciente a los accionistas" },
+          { "symbol": "N_{\\text{acciones}}", "meaning": "Cantidad total de acciones en circulación" }
+        ],
+        "common_pitfall": "Dividir directamente el Enterprise Value (EV) por el número de acciones olvidando restar la deuda que reclaman primero los acreedores."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Valuación de Bono Corporativo y Precio Intrínseco de Acción — Lácteos del Litoral S.A.",
+      "given_data": [
+        { "label": "Bono corporativo a emitir", "value": "VN = $1.000 | Cupón anual = 8% ($80) | Plazo = 2 años | YTM de mercado = 10%" },
+        { "label": "Dividendo recién pagado (D0)", "value": "$3,00 por acción" },
+        { "label": "Política de reinversión", "value": "Retiene b = 40% de utilidades con ROE = 15%" },
+        { "label": "Costo del Equity (Ke)", "value": "14,0% anual" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Valuar el bono descontando cupones y nominal a la YTM de mercado del 10%",
+          "calculation": "P_B = (80 / 1,10) + (1.080 / 1,10^2) = 72,73 + 892,56",
+          "result": "$965,29 (cotiza bajo la par)"
+        },
+        {
+          "step_number": 2,
+          "description": "Calcular la tasa de crecimiento sostenible (g) para la acción",
+          "calculation": "g = ROE * b = 15% * 0,40",
+          "result": "6,0% anual"
+        },
+        {
+          "step_number": 3,
+          "description": "Proyectar el próximo dividendo esperado (D1)",
+          "calculation": "D_1 = D_0 * (1 + g) = 3,00 * (1 + 0,06)",
+          "result": "$3,18 por acción"
+        },
+        {
+          "step_number": 4,
+          "description": "Aplicar Gordon-Shapiro para obtener el precio intrínseco de la acción (P0)",
+          "calculation": "P_0 = D_1 / (Ke - g) = 3,18 / (0,14 - 0,06) = 3,18 / 0,08",
+          "result": "$39,75 por acción"
+        }
+      ],
+      "final_conclusion": "El bono debe colocarse a descuento ($965,29) porque su cupón del 8% es inferior al 10% que exige el mercado. En paralelo, si la acción cotiza en bolsa por debajo de $39,75, estaría subvaluada frente a los fundamentos de rentabilidad y crecimiento de la firma."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m4_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Por qué cae el precio de mercado de un bono a tasa fija ya emitido cuando el Banco Central sube las tasas de interés de referencia?",
+      "hint": "Pensá en la alternativa que tiene un inversor comprando bonos recién emitidos hoy.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque los cupones del bono viejo quedaron fijos. Como los bonos nuevos pagan tasas más altas, nadie compraría el bono viejo a su valor nominal. Su precio de mercado debe bajar hasta que la ganancia de capital al vencimiento compense los cupones más bajos e iguale la nueva YTM exigida.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 3"
+    },
+    {
+      "card_id": "m4_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Entre dos bonos a 10 años —el Bono A con cupón del 10% anual y el Bono B cupón cero (0%)—, ¿cuál sufre una caída porcentual mayor si las tasas suben +100 bps?",
+      "hint": "Compará en qué momento del tiempo recuperás el flujo de efectivo en cada bono (Duration).",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "El Bono B (cupón cero). La Duration mide el plazo promedio ponderado de cobro de los flujos. En el Bono B el 100% del dinero se cobra recién en el año 10 (Duration máxima = 10 años), mientras que el Bono A devuelve flujo anticipado todos los años con cupones del 10%. A mayor Duration, mayor sensibilidad al cambio de tasas.",
+      "source_reference": "Berk & DeMarzo - Cap. 6"
+    },
+    {
+      "card_id": "m4_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Un bono corporativo tiene Valor Nominal $1.000 y paga un cupón anual del 7%. Actualmente, bonos de riesgo equivalente rinden una YTM de 9% en el mercado. ¿Cómo debería cotizar este bono?",
+      "hint": "Compará la tasa que paga el bono (7%) frente a la que exige el mercado (9%).",
+      "options": [
+        "A) Sobre la par (> $1.000), porque ofrece cupones fijos garantizados.",
+        "B) Exactamente a la par ($1.000), ya que el valor nominal no cambia.",
+        "C) Bajo la par (< $1.000, a descuento), para que el comprador alcance un retorno total del 9%.",
+        "D) A $1.070, sumando el primer cupón al valor nominal."
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Siempre que la YTM de mercado (9%) supera a la tasa cupón (7%), el bono cotiza bajo la par (descuento). La diferencia entre el precio pagado (<$1.000) y el nominal cobrado al final ($1.000) completa el retorno hasta igualar el 9% exigido.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 8"
+    },
+    {
+      "card_id": "m4_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "¿En cuál de las siguientes situaciones resulta INVÁLIDO aplicar el modelo de Gordon-Shapiro P0 = D1 / (Ke - g) para valuar una acción?",
+      "hint": "Revisá los supuestos matemáticos del denominador y la existencia de dividendos.",
+      "options": [
+        "A) Cuando la empresa tiene deuda financiera en su Balance General.",
+        "B) Cuando se trata de una firma de alto crecimiento que no reparte dividendos o presenta temporalmente g >= Ke.",
+        "C) Cuando la tasa libre de riesgo (Rf) es inferior al 5% anual.",
+        "D) Siempre que la Beta apalancada de la compañía supere 1,0."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "El modelo de Gordon-Shapiro supone un crecimiento constante perpetuo estrictamente menor a Ke (si g >= Ke, la fórmula da precios infinitos o negativos absurdos) y exige que la firma distribuya dividendos predecibles. Para firmas que reinvierten el 100%, se valúa mediante FCFF.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 4"
+    },
+    {
+      "card_id": "m4_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Calculaste el Enterprise Value (EV) de tu empresa descontando los FCFF futuros al WACC. ¿Cómo pasás correctamente de ese EV al Valor Total del Patrimonio (Equity Value)?",
+      "hint": "Pensá quién tiene derecho prioritario sobre los flujos y a quién pertenece la caja líquida disponible.",
+      "options": [
+        "A) Restás la Caja disponible y sumás la Deuda Total.",
+        "B) Multiplicás el EV directamente por (1 - T).",
+        "C) Dividís el EV por la Beta apalancada del sector.",
+        "D) Sumás la Caja excedente y restás la Deuda Financiera Total."
+      ],
+      "correct_option_index": 3,
+      "back_explanation": "El EV refleja el valor de los activos operativos para todos los proveedores de capital. Como los acreedores tienen prioridad de cobro, debemos restar la Deuda Total, y como la caja líquida no operativa suma riqueza directa neta, se suma (equivale a restar la Deuda Neta = Deuda - Caja).",
+      "source_reference": "Damodaran - Investment Valuation"
+    },
+    {
+      "card_id": "m4_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Un bono corporativo cotiza hoy a $1.000 y tiene una Duration Modificada (D_mod) de 6,0 años. Si la tasa de rendimiento exigida (YTM) sube repentinamente +1,5% (+150 bps), ¿cuál es el precio aproximado del bono?",
+      "hint": "Usá ΔP/P ≈ -D_mod * ΔYTM (expresando 1,5% como 0,015).",
+      "options": [
+        "A) $910,00",
+        "B) $1.090,00",
+        "C) $940,00",
+        "D) $985,00"
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Aplicando la aproximación lineal de Duration: ΔP/P ≈ -6,0 * (+0,015) = -0,09 (-9,0%). Por lo tanto, el precio cae aproximadamente un 9%: $1.000 * (1 - 0,09) = $910,00.",
+      "source_reference": "Berk & DeMarzo - Cap. 6"
+    },
+    {
+      "card_id": "m4_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Una empresa de servicios públicos acaba de pagar un dividendo D0 = $4,00 por acción. El mercado espera un crecimiento constante g = 5% anual a perpetuidad y exige un retorno Ke = 13%. ¿Cuál es el precio intrínseco hoy (P0)?",
+      "hint": "No olvides proyectar primero D1 = D0 * (1 + g) antes de dividir por (Ke - g).",
+      "options": [
+        "A) $50,00",
+        "B) $32,31",
+        "C) $52,50",
+        "D) $23,33"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "Paso 1: Como $4,00 es D0 (recién pagado), calculamos D1 = 4,00 * (1 + 0,05) = $4,20. Paso 2: P0 = D1 / (Ke - g) = 4,20 / (0,13 - 0,05) = 4,20 / 0,08 = $52,50.",
+      "source_reference": "Ross, Westerfield & Jaffe - Cap. 9"
+    },
+    {
+      "card_id": "m4_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Al descontar los FCFF al WACC obtenés un Enterprise Value (EV) de $12.500.000. El Balance muestra Caja = $1.500.000, Deuda Financiera = $4.000.000 y existen 500.000 acciones en circulación. ¿Cuál es el valor intrínseco por acción?",
+      "hint": "Calculá Equity Value = EV + Caja - Deuda Total y dividí por 500.000 acciones.",
+      "options": [
+        "A) $25,00",
+        "B) $20,00",
+        "C) $17,00",
+        "D) $30,00"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Paso 1: V_Equity = $12.500.000 + $1.500.000 - $4.000.000 = $10.000.000. Paso 2: Precio por acción = $10.000.000 / 500.000 = $20,00 por acción.",
+      "source_reference": "Damodaran - Applied Corporate Finance"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_4",
+    "case_title": "Emisión de Deuda vs. Equity ante Volatilidad de Tasas",
+    "company_name": "Lácteos del Litoral S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Durante 3 trimestres enfrentarás volatilidad en las tasas de mercado que encarecen las emisiones de bonos. Deberás financiar proyectos rentables eligiendo entre caja, deuda o equity para maximizar el valor por acción sin deteriorar tu calificación crediticia."
+  }
+}

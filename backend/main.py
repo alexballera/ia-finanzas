@@ -11,6 +11,8 @@ import ai_evaluator
 import engine
 from models import (
     AIFeedback,
+    DividendPreviewRequest,
+    DividendPreviewResponse,
     EngineResult,
     HealthResponse,
     InitSimulationRequest,
@@ -69,3 +71,23 @@ def step_simulation(request: StepSimulationRequest) -> SimulationStepResponse:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     summary = engine.build_turn_summary(request.state, result)
     return _to_response(result, ai_evaluator.evaluate_turn_with_ai(summary))
+
+
+@app.post("/api/simulation/preview", response_model=DividendPreviewResponse)
+def preview_simulation(request: DividendPreviewRequest) -> DividendPreviewResponse:
+    """Proyección sin dividendos para habilitar decisiones de distribución seguras en el cliente."""
+    try:
+        result = engine.step_simulation(
+            request.state,
+            request.selected_project_id,
+            request.financing_option,
+        )
+    except engine.SimulationClosedError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except engine.EngineError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    return DividendPreviewResponse(
+        projected_cash_before_dividends=result.state.balance_sheet.cash,
+        projected_interest_coverage=result.state.valuation_and_risk_kpis.interest_coverage,
+    )

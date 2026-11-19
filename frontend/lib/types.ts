@@ -7,7 +7,7 @@
 
 // --- Contenido curricular (module_X.json) -----------------------------------
 
-export type ModuleId = 1 | 2 | 3;
+export type ModuleId = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type PhaseNumber = 1 | 2 | 3;
 
@@ -96,7 +96,14 @@ export interface FutureModule {
 
 // --- API del simulador (backend/models.py) ----------------------------------
 
-export type ScenarioId = "sim_mod_1" | "sim_mod_2" | "sim_mod_3" | "final_game";
+export type ScenarioId =
+  | "sim_mod_1"
+  | "sim_mod_2"
+  | "sim_mod_3"
+  | "sim_mod_4"
+  | "sim_mod_5"
+  | "sim_mod_6"
+  | "final_game";
 
 export type SimulationMode = "PHASE_3" | "FINAL_GAME";
 
@@ -184,6 +191,7 @@ export interface SimulationMeta {
   debt_100_blocked: boolean;
   emergency_overdraft_count: number;
   cumulative_approved_npv: number;
+  cumulative_dividends?: number;
   cumulative_fcff: number;
 }
 
@@ -288,6 +296,7 @@ export interface HistoryEntry {
   roic_annualized: number;
   eva_annualized: number;
   emergency_debt: number;
+  dividends?: number;
   game_status: GameStatus;
 }
 
@@ -338,6 +347,17 @@ export interface StepSimulationRequest {
   selected_project_id?: string | null;
   financing_option?: FinancingOption;
   dividends?: number;
+}
+
+export interface DividendPreviewRequest {
+  state: CompanyState;
+  selected_project_id?: string | null;
+  financing_option?: FinancingOption;
+}
+
+export interface DividendPreviewResponse {
+  projected_cash_before_dividends: number;
+  projected_interest_coverage: number;
 }
 
 export interface SimulationStepResponse {

@@ -1,0 +1,227 @@
+{
+  "module_id": 6,
+  "slug": "valuacion-por-multiplos-y-ma",
+  "title": "Valuación por Múltiplos y M&A",
+  "subtitle": "Comparables de mercado (EV/EBITDA y P/E), primas de control, sinergias y creación de valor en adquisiciones",
+  "bibliographic_sources": [
+    "Brealey, Myers & Allen - Principios de Finanzas Corporativas (Cap. 31 - Fusiones)",
+    "McKinsey & Company - Valuation (Caps. 16 y 27 - Múltiplos y M&A)",
+    "Damodaran - Investment Valuation / Applied Corporate Finance",
+    "Berk & DeMarzo - Corporate Finance (Caps. 9 y 28)"
+  ],
+  "phase_1_theory": {
+    "cfo_intuition": "Antes de enfrentar el simulador integrador final, necesitás dominar las dos herramientas con las que los directorios comparan empresas y deciden adquisiciones: los múltiplos de mercado y el análisis de Fusiones y Adquisiciones (M&A). Los múltiplos permiten leer rápidamente cómo valúa el mercado a tus competidores, mientras que el análisis M&A evita la trampa ejecutiva más cara del mundo corporativo: comprar facturación pagando primas excesivas sin sinergias reales que destruyen el EVA del comprador.",
+    "concepts": [
+      {
+        "title": "Regla de Consistencia en Múltiplos: EV/EBITDA vs. P/E",
+        "explanation": "Al comparar empresas mediante múltiplos relativos, numerador y denominador deben corresponder al mismo grupo de proveedores de capital. El múltiplo EV/EBITDA (y EV/EBIT) relaciona el valor total de la firma con flujos operativos antes de intereses, permitiendo comparar compañías con distinto endeudamiento. En cambio, P/E (Precio / Ganancia por acción) relaciona solo Equity con Utilidad Neta, quedando distorsionado por la estructura de deuda.",
+        "formula_latex": "\\text{Múltiplo de Firma: } \\frac{EV}{EBITDA} \\quad ; \\quad \\text{Múltiplo de Equity: } \\frac{P}{E} = \\frac{\\text{Precio por acción}}{EPS}",
+        "variables_legend": [
+          { "symbol": "EV", "meaning": "Enterprise Value: Valor de mercado de Deuda + Equity - Caja" },
+          { "symbol": "P/E", "meaning": "Price-to-Earnings Ratio (múltiplo sobre el Patrimonio Neto)" },
+          { "symbol": "EPS", "meaning": "Earnings Per Share (Utilidad Neta / Cantidad de acciones)" }
+        ],
+        "common_pitfall": "Mezclar múltiplos inconsistentes (como EV / Utilidad Neta o Precio / EBITDA) o ignorar las diferencias de deuda al aplicar múltiplos de competidores."
+      },
+      {
+        "title": "Fundamentos Detrás del Múltiplo (Fórmula de McKinsey)",
+        "explanation": "Un múltiplo no es un número arbitrario: es una fórmula de Flujo de Caja Descontado comprimida. Según McKinsey, el múltiplo justo EV/NOPAT depende exclusivamente de tres impulsores de valor: el crecimiento esperado (g), el ROIC que genera ese crecimiento y el WACC. Dos empresas del mismo sector solo merecen el mismo múltiplo si tienen similar ROIC, crecimiento y riesgo.",
+        "formula_latex": "\\frac{EV}{NOPAT} = \\frac{1 - (g / ROIC)}{WACC - g}",
+        "variables_legend": [
+          { "symbol": "g / ROIC", "meaning": "Tasa de reinversión requerida para sostener el crecimiento g" },
+          { "symbol": "WACC - g", "meaning": "Diferencial entre costo de capital y crecimiento perpetuo (g < WACC)" }
+        ],
+        "common_pitfall": "Aplicar el múltiplo promedio de una empresa tecnológica líder (alto ROIC) a una compañía mediocre del mismo sector que destruye valor (ROIC < WACC)."
+      },
+      {
+        "title": "Anatomía de M&A: Sinergias vs. Prima de Control",
+        "explanation": "Para comprar el control de otra empresa suele exigirse una prima por encima de su valor individual (standalone). Desde el criterio estricto del VAN, una adquisición solo crea riqueza para los accionistas del comprador si el Valor Presente de las sinergias operativas reales (ahorros de costos, escala o cross-selling) supera la prima pagada sobre el valor standalone de la empresa adquirida.",
+        "formula_latex": "VAN_{M\\&A} = VP(\\text{Sinergias}) - (\\text{Precio Pagado} - V_{\\text{Target Standalone}})",
+        "variables_legend": [
+          { "symbol": "VP(\\text{Sinergias})", "meaning": "Valor presente de flujos incrementales reales por operar combinados" },
+          { "symbol": "\\text{Prima}", "meaning": "Exceso pagado por sobre el valor standalone del objetivo" }
+        ],
+        "common_pitfall": "Sobreestimar sinergias optimistas en presentaciones de venta para justificar una prima de adquisición desmedida ('winner's curse')."
+      },
+      {
+        "title": "La Falacia de la Acreción de EPS en Fusiones con Acciones",
+        "explanation": "Si una empresa con P/E alto (ej. 20x) compra a una empresa con P/E bajo (ej. 10x) pagando con sus propias acciones, la Utilidad por Acción (EPS) contable de la entidad combinada sube automáticamente aunque no exista ninguna sinergia. Ese efecto puramente aritmético ('bootstrap game') NO crea valor económico: el mercado ajusta el múltiplo combinado a la baja si no hay mejora real de ROIC y flujos.",
+        "formula_latex": "\\text{Regla de oro M\\&A: } \\text{Decidir por } VAN_{M\\&A} > 0 \\text{ y } ROIC_{\\text{sobre inversión}} > WACC, \\text{ no por } \\Delta EPS",
+        "variables_legend": [
+          { "symbol": "\\Delta EPS", "meaning": "Cambio contable de corto plazo en la ganancia por acción" }
+        ],
+        "common_pitfall": "Aprobar una fusión destructiva de valor simplemente porque el banquero de inversión muestra que 'es acrecentiva en EPS desde el Año 1'."
+      }
+    ],
+    "worked_example": {
+      "scenario_title": "Evaluación de Adquisición por Múltiplos y Sinergias — Grupo Andino S.A. adquiere Logística Norte",
+      "given_data": [
+        { "label": "Múltiplo comparable del sector", "value": "EV / EBITDA = 6,0x" },
+        { "label": "Datos de Logística Norte (Target)", "value": "EBITDA anual = $500.000 | Deuda = $600.000 | Caja = $100.000" },
+        { "label": "Precio exigido por el 100% del Equity", "value": "$2.900.000" },
+        { "label": "Sinergias netas anuales estimadas", "value": "$72.000 anuales a perpetuidad (sin crecimiento)" },
+        { "label": "WACC aplicable", "value": "12,0% anual" }
+      ],
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Estimar el Enterprise Value Standalone del target usando el múltiplo del sector",
+          "calculation": "EV_standalone = 6,0 * $500.000",
+          "result": "$3.000.000"
+        },
+        {
+          "step_number": 2,
+          "description": "Pasar de EV al Valor Standalone del Equity del target",
+          "calculation": "V_Equity_standalone = EV ($3.000.000) + Caja ($100.000) - Deuda ($600.000)",
+          "result": "$2.500.000"
+        },
+        {
+          "step_number": 3,
+          "description": "Calcular la Prima de Control exigida por los vendedores",
+          "calculation": "Prima = Precio Exigido ($2.900.000) - V_Equity_standalone ($2.500.000)",
+          "result": "$400.000"
+        },
+        {
+          "step_number": 4,
+          "description": "Calcular el Valor Presente de las sinergias operativas perpetuas",
+          "calculation": "VP(Sinergias) = $72.000 / 0,12",
+          "result": "$600.000"
+        },
+        {
+          "step_number": 5,
+          "description": "Determinar el VAN neto de la adquisición para Grupo Andino S.A.",
+          "calculation": "VAN_M&A = VP(Sinergias) ($600.000) - Prima ($400.000)",
+          "result": "+$200.000 (Crea valor)"
+        }
+      ],
+      "final_conclusion": "La adquisición es económicamente viable: aunque se paga una prima de $400.000 sobre el valor standalone del Equity, las sinergias operativas valen $600.000 hoy, dejando un VAN neto de +$200.000 para los accionistas compradores."
+    }
+  },
+  "phase_2_cards": [
+    {
+      "card_id": "m6_c1",
+      "card_type": "FLASHCARD",
+      "difficulty": "BASICO",
+      "front_question": "¿Por qué el múltiplo EV/EBITDA suele ser superior al P/E al comparar la valuación operativa de dos competidores con distinto nivel de deuda?",
+      "hint": "Fijate en qué parte del Estado de Resultados aparece el gasto por intereses.",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Porque tanto el Enterprise Value (EV) como el EBITDA son previos al pago de intereses y corresponden a todos los proveedores de capital (acreedores + accionistas). El P/E utiliza la Utilidad Neta (afectada por intereses, impuestos y apalancamiento), distorsionando comparaciones entre empresas con distinta deuda.",
+      "source_reference": "McKinsey & Company - Valuation (Cap. 16)"
+    },
+    {
+      "card_id": "m6_c2",
+      "card_type": "FLASHCARD",
+      "difficulty": "INTERMEDIO",
+      "front_question": "En una adquisición (M&A), ¿qué diferencia fundamental existe para los accionistas del comprador entre pagar en Efectivo versus pagar con Acciones propias?",
+      "hint": "Pensá en quién se queda con las sinergias futuras (o asume el riesgo de haber pagado de más).",
+      "options": [],
+      "correct_option_index": null,
+      "back_explanation": "Al pagar en efectivo, los vendedores salen del negocio y los accionistas del comprador capturan el 100% de las sinergias futuras (pero también asumen el 100% del riesgo si fallan). Al pagar con acciones, los dueños del target pasan a ser socios de la empresa combinada y comparten proporcionalmente tanto las sinergias como el riesgo de integración.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 31"
+    },
+    {
+      "card_id": "m6_c3",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "¿Cuál de los siguientes múltiplos de valuación VIOLA la Regla de Consistencia entre numerador y denominador?",
+      "hint": "Verificá si tanto el numerador como el denominador pertenecen solo al Equity o a toda la Firma (Deuda + Equity).",
+      "options": [
+        "A) Enterprise Value / EBITDA (EV / EBITDA)",
+        "B) Precio por Acción / Ganancia por Acción (P / E)",
+        "C) Enterprise Value / Utilidad Neta (EV / Net Income)",
+        "D) Enterprise Value / Flujo de Caja Libre de la Firma (EV / FCFF)"
+      ],
+      "correct_option_index": 2,
+      "back_explanation": "EV / Utilidad Neta es inconsistente: el Enterprise Value incluye el valor de la deuda y del equity, mientras que la Utilidad Neta es lo que queda únicamente para el accionista después de pagar intereses a los acreedores.",
+      "source_reference": "Damodaran - Investment Valuation"
+    },
+    {
+      "card_id": "m6_c4",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Según la fórmula fundamental de McKinsey, la Empresa A cotiza a un EV/EBITDA más alto que la Empresa B en el mismo sector. ¿Qué fundamento económico justifica esa prima de valuación?",
+      "hint": "Revisá los 3 drivers de EV/NOPAT = [1 - (g / ROIC)] / (WACC - g).",
+      "options": [
+        "A) La Empresa A logra un ROIC superior (crecimiento más eficiente en capital) y/o tiene un menor WACC.",
+        "B) La Empresa A registra cargos contables de depreciación más altos que la Empresa B.",
+        "C) La Empresa A paga tasas de interés más caras a sus bancos acreedores.",
+        "D) La Empresa A expande sus ventas agresivamente aun manteniendo un ROIC inferior al WACC."
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Un mayor ROIC permite crecer necesitando menos reinversión (g / ROIC más bajo) y un menor WACC aumenta el valor presente de los flujos futuros. En cambio, crecer con ROIC < WACC destruye valor y reduce el múltiplo justo.",
+      "source_reference": "McKinsey & Company - Valuation (Cap. 16)"
+    },
+    {
+      "card_id": "m6_c5",
+      "card_type": "CONCEPT_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Una empresa que cotiza a P/E = 20x adquiere mediante intercambio de acciones a un competidor con P/E = 10x, sin generar ninguna sinergia operativa. Tras cerrar la operación, su Utilidad por Acción (EPS) contable sube. ¿Significa esto que la fusión creó valor?",
+      "hint": "Recordá el 'bootstrap game' en adquisiciones con acciones.",
+      "options": [
+        "A) Sí, porque cualquier aumento en la ganancia por acción crea riqueza económica.",
+        "B) No: esa suba de EPS es una ilusión aritmética de corto plazo; sin sinergias reales ni mejora de ROIC, no se creó valor (e incluso se destruye si hubo prima).",
+        "C) Sí, porque fusionarse reduce automáticamente la alícuota impositiva corporativa.",
+        "D) Únicamente si la empresa comprada tenía cero deuda financiera."
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Cambiar acciones de alto P/E por ganancias de bajo P/E infla matemáticamente el EPS combinado, pero el mercado racional ajusta a la baja el múltiplo P/E resultante para reflejar el menor crecimiento/calidad promedio, dejando el valor total inalterado salvo que existan sinergias genuinas.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 31"
+    },
+    {
+      "card_id": "m6_c6",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "BASICO",
+      "front_question": "Las empresas comparables del sector alimenticio cotizan en promedio a EV/EBITDA = 7,5x. Evaluás una empresa privada con EBITDA anual = $800.000, Deuda Total = $1.500.000 y Caja = $300.000. ¿Cuál es el Valor estimado de su Patrimonio (Equity Value)?",
+      "hint": "Calculá primero EV = Múltiplo * EBITDA y luego convertí EV en Equity Value sumando Caja y restando Deuda.",
+      "options": [
+        "A) $6.000.000",
+        "B) $4.500.000",
+        "C) $7.200.000",
+        "D) $4.800.000"
+      ],
+      "correct_option_index": 3,
+      "back_explanation": "Paso 1: EV = 7,5 * $800.000 = $6.000.000. Paso 2: Equity Value = EV ($6.000.000) + Caja ($300.000) - Deuda ($1.500.000) = $4.800.000.",
+      "source_reference": "Berk & DeMarzo - Cap. 9"
+    },
+    {
+      "card_id": "m6_c7",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "INTERMEDIO",
+      "front_question": "Una firma objetivo tiene un Valor Standalone de su Equity de $5.000.000. Estimás sinergias perpetuas de costos (después de impuestos) de $180.000 anuales, descontadas a WACC = 10%. Si los vendedores exigen $6.200.000 por sus acciones, ¿cuál es el VAN neto de la adquisición para el comprador?",
+      "hint": "Calculá VP(Sinergias) = $180.000 / 0,10 y restale la Prima exigida ($6.200.000 - $5.000.000).",
+      "options": [
+        "A) -$1.020.000",
+        "B) +$600.000",
+        "C) -$1.200.000",
+        "D) +$1.800.000"
+      ],
+      "correct_option_index": 1,
+      "back_explanation": "Paso 1: VP(Sinergias) = $180.000 / 0,10 = $1.800.000. Paso 2: Prima exigida = $6.200.000 - $5.000.000 = $1.200.000. Paso 3: VAN_M&A = $1.800.000 - $1.200.000 = +$600.000.",
+      "source_reference": "Brealey, Myers & Allen - Cap. 31"
+    },
+    {
+      "card_id": "m6_c8",
+      "card_type": "CALCULATION_QUIZ",
+      "difficulty": "DESAFIO",
+      "front_question": "Aplicando la fórmula fundamental de McKinsey EV/NOPAT = [1 - (g / ROIC)] / (WACC - g), si una empresa crece a perpetuidad al g = 4%, tiene un WACC = 9% y logra un ROIC = 20%, ¿cuál es su múltiplo EV/NOPAT justificado?",
+      "hint": "Calculá primero la tasa de reinversión (g / ROIC = 4% / 20%) y luego dividí por (WACC - g).",
+      "options": [
+        "A) 16,0x",
+        "B) 20,0x",
+        "C) 4,0x",
+        "D) 6,15x"
+      ],
+      "correct_option_index": 0,
+      "back_explanation": "Paso 1: Tasa de reinversión = g / ROIC = 0,04 / 0,20 = 0,20 (20%). Paso 2: Numerador = 1 - 0,20 = 0,80. Paso 3: Denominador = WACC - g = 0,09 - 0,04 = 0,05. Paso 4: EV/NOPAT = 0,80 / 0,05 = 16,0x.",
+      "source_reference": "McKinsey & Company - Valuation (Cap. 16)"
+    }
+  ],
+  "phase_3_brief": {
+    "scenario_id": "sim_mod_6",
+    "case_title": "Crecimiento Inorgánico: Adquisición Estratégica vs. Disciplina de EVA",
+    "company_name": "Grupo Andino S.A.",
+    "your_role": "CFO (Director de Finanzas)",
+    "mission_objective": "Antes de enfrentar el simulador integrador final de 12 trimestres, deberás evaluar oportunidades de expansión inorgánica (M&A) y captura de sinergias. Tu meta es distinguir adquisiciones que crean EVA real de primas excesivas que destruyen valor."
+  }
+}

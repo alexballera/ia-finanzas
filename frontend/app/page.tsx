@@ -61,9 +61,9 @@ export default function Home() {
           Aprender a decidir como un CFO: de la fórmula a la creación de valor
         </h1>
         <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-300">
-          Tres módulos progresivos, cada uno en tres fases: teoría condensada, práctica con
-          flashcards y quizzes, y la simulación de un caso real. El recorrido cierra con una
-          evaluación final integradora, «Cashflow Corporativo».
+          Seis módulos progresivos, cada uno en tres fases: teoría condensada, práctica con
+          flashcards y quizzes, y una simulación de caso real. El recorrido cierra con la
+          evaluación integradora «Cashflow Corporativo».
         </p>
 
         <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -97,7 +97,7 @@ export default function Home() {
             Mapa curricular
           </h2>
           <p className="mt-1.5 text-sm text-slate-400">
-            Tres módulos disponibles y tres en el roadmap. El progreso se guarda en este navegador.
+            Seis módulos disponibles. El progreso se guarda en este navegador.
           </p>
         </div>
         <CurriculumGrid modules={MODULE_SUMMARIES} futureModules={FUTURE_MODULES} />

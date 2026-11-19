@@ -23,6 +23,9 @@ class ScenarioId(StrEnum):
     SIM_MOD_1 = "sim_mod_1"
     SIM_MOD_2 = "sim_mod_2"
     SIM_MOD_3 = "sim_mod_3"
+    SIM_MOD_4 = "sim_mod_4"
+    SIM_MOD_5 = "sim_mod_5"
+    SIM_MOD_6 = "sim_mod_6"
     FINAL_GAME = "final_game"
 
 
@@ -134,6 +137,7 @@ class ScenarioGoal(StrictModel):
     final_cash_above: float | None = None
     final_eva_above: float | None = None
     cumulative_approved_npv_above: float | None = None
+    cumulative_dividends_above: float | None = None
     interest_coverage_at_least: float | None = None
     max_emergency_overdrafts: int | None = Field(default=None, ge=0)
 
@@ -188,6 +192,7 @@ class SimulationMeta(StrictModel):
     debt_100_blocked: bool
     emergency_overdraft_count: int = Field(ge=0)
     cumulative_approved_npv: float
+    cumulative_dividends: float = 0.0
     cumulative_fcff: float
 
 
@@ -292,6 +297,7 @@ class HistoryEntry(StrictModel):
     roic_annualized: float
     eva_annualized: float
     emergency_debt: float
+    dividends: float = 0.0
     game_status: GameStatus
 
 
@@ -416,6 +422,17 @@ class StepSimulationRequest(StrictModel):
     )
     financing_option: FinancingOption = FinancingOption.CASH_100
     dividends: float = Field(default=0.0, ge=0)
+
+
+class DividendPreviewRequest(StrictModel):
+    state: CompanyState
+    selected_project_id: str | None = None
+    financing_option: FinancingOption = FinancingOption.CASH_100
+
+
+class DividendPreviewResponse(StrictModel):
+    projected_cash_before_dividends: float
+    projected_interest_coverage: float
 
 
 class EngineResult(StrictModel):
