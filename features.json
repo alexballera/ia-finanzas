@@ -3,6 +3,6 @@
     { "id": "T1_MODULOS_4_5_6", "estado": "pasa" },
     { "id": "T2_TUTOR_IA_DRAWER", "estado": "pasa" },
     { "id": "T3_LANDING_Y_CURRICULUM", "estado": "pasa" },
-    { "id": "T4_DOCS_Y_RESUMEN", "estado": "falla" }
+    { "id": "T4_DOCS_Y_RESUMEN", "estado": "pasa" }
   ]
 }

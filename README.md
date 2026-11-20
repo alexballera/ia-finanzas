@@ -1,80 +1,76 @@
-# Finanzas corporativas: plataforma educativa y simulador CFO
+# Finanzas Corporativas · Simulador CFO
 
-Proyecto académico para la **Tecnicatura en Gestión y Análisis de Datos de la UBA**. La aplicación combina contenidos de finanzas corporativas con decisiones simuladas de inversión y financiamiento.
+Plataforma educativa desarrollada para la **Tecnicatura en Gestión y Análisis de Datos de la UBA**. Permite aprender finanzas corporativas y practicar decisiones de inversión, financiamiento y distribución de caja en escenarios simulados.
 
-## Metodología
+**[Abrir la aplicación en vivo](https://ia-finanzas-psi.vercel.app/)**
 
-El recorrido comprende tres módulos, cada uno organizado en tres fases:
+## Propuesta de valor y mini plan de marketing
 
-1. **Teoría:** conceptos, fórmulas y ejemplos desarrollados.
-2. **Práctica:** tarjetas de repaso y cuestionarios interactivos.
-3. **Caso CFO:** simulación de una empresa durante tres trimestres.
+**Problema.** Memorizar fórmulas por separado no prepara para tomar decisiones estratégicas integradas bajo incertidumbre. La plataforma conecta teoría, práctica y simulación para mostrar cómo una decisión afecta, al mismo tiempo, la caja, el riesgo y la creación de valor.
 
-El **Simulador Integrador Final: Cashflow Corporativo** reúne los conceptos en una partida de hasta 12 trimestres. El objetivo es sostener la creación de valor, medida mediante EVA, sin perder solvencia. El modo docente/demo permite acceder libremente a los módulos y al simulador final.
+- **Beneficios racionales:** contenidos basados en referencias estándar (Brealey y Myers, Ross y Westerfield, Berk y DeMarzo, Damodaran y McKinsey), cifras calculadas por un motor determinista en lugar de ser generadas por IA y trazabilidad por trimestre exportable en `.CSV`. La certificación es una proyección futura, no un beneficio disponible hoy.
+- **Beneficios emocionales:** satisfacción de dominar las palancas de creación de valor y confianza para posicionarse como **referente financiero estratégico** en una corporación, PyME o empresa familiar.
+- **Público objetivo:** en **B2C**, estudiantes de grado, posgrado, MBA y análisis de datos; en **B2B**, equipos de Finanzas y gerentes no financieros que buscan capacitarse, además de PyMEs y empresas familiares que buscan profesionalizar sus decisiones.
+- **Diferencial:** a diferencia de una planilla estática, la simulación muestra las consecuencias de cada decisión a lo largo de varios trimestres. A diferencia de un chatbot genérico, el tutor interpreta un contexto curricular y cifras calculadas por Python.
+- **Acciones propuestas:** difundir el enlace y un caso breve en comunidades estudiantiles y profesionales para B2C; ofrecer demostraciones y talleres piloto con Modo Docente / Demo para B2B. Usar como señales iniciales la finalización del primer caso y las solicitudes de demostración. Estas acciones no representan campañas ni métricas implementadas.
 
-La base bibliográfica incluye a **Brealey y Myers**, **Ross y Westerfield**, **Berk y DeMarzo**, **Aswath Damodaran** y **McKinsey**.
+## Funcionalidades activas
 
-## Arquitectura
+| Ruta | Qué ofrece |
+| --- | --- |
+| [`/`](https://ia-finanzas-psi.vercel.app/) | Landing ejecutiva con la propuesta de valor y acceso al recorrido. |
+| [`/curriculum`](https://ia-finanzas-psi.vercel.app/curriculum) | Mapa curricular con **seis módulos completos**, desbloqueo progresivo y Modo Docente / Demo para acceso libre. |
+| `/modules/[id]` | Tres fases por módulo: teoría con fórmulas LaTeX, práctica con **48 tarjetas interactivas** en total (ocho por módulo) y casos CFO de tres trimestres. |
+| `POST /api/tutor/chat` | **Tutor CFO IA** en un panel lateral contextual. En la Fase 2, cuando hay una tarjeta activa, aplica un filtro para sustituir respuestas que revelen explícitamente una opción por pistas socráticas. |
+| [`/simulator`](https://ia-finanzas-psi.vercel.app/simulator) | **Cashflow Corporativo**, simulador final de hasta **12 trimestres**, con gráfico de cascada (Waterfall) del flujo de caja libre para la firma (FCFF), evolución de ROIC frente a WACC y exportación `.CSV`. El objetivo es sostener la creación de valor (EVA) sin perder solvencia. |
 
-- **Frontend:** Next.js, TypeScript, KaTeX y Recharts. El progreso y las partidas se guardan en el `localStorage` del navegador; no hay base de datos.
-- **Backend:** FastAPI y un motor financiero determinista en Python. Calcula estados contables, flujo de caja libre, VAN, TIR, WACC, ROIC y EVA, y valida el balance.
-- **IA:** Gemini recibe un resumen de cifras y variaciones ya calculadas por Python y redacta un diagnóstico ejecutivo estructurado. La IA no realiza los cálculos financieros. Si falta la clave o falla la llamada, el sistema utiliza un diagnóstico determinista de respaldo.
-- **Despliegue:** Vercel Services enruta `/api/*` al backend y las demás rutas al frontend. Los endpoints del backend conservan el prefijo `/api`.
+El recorrido aborda presupuesto de capital; riesgo, retorno y costo de capital; estructura de capital y EVA; valuación de bonos y acciones; capital de trabajo y dividendos; y valuación por múltiplos y fusiones y adquisiciones.
 
-Las cifras financieras se expresan en miles de USD (`$k`); los flujos son trimestrales y el WACC, el ROIC y el EVA se presentan anualizados.
+## Arquitectura y harness de desarrollo
+
+- **Frontend (`frontend/`):** Next.js con App Router, TypeScript, Tailwind CSS, KaTeX y Recharts. El progreso y las partidas se guardan en `localStorage`; el historial del tutor se conserva por pestaña en `sessionStorage`.
+- **Backend (`backend/`):** FastAPI y un motor determinista en Python con `numpy` y `numpy-financial`. Python es el único responsable de los cálculos financieros y contables. Los montos están en miles de USD, los flujos son trimestrales y las tasas y métricas de retorno se anualizan. El backend no guarda estado ni usa base de datos.
+- **IA:** Gemini, vía `google-genai` con Structured Outputs, redacta diagnósticos ejecutivos y orienta al estudiante. Si no está disponible, se usa un respaldo determinista basado en reglas.
+- **Despliegue:** [Vercel Services](vercel.json) monta ambos servicios desde la raíz del monorepo. Enruta `/api/*` a FastAPI conservando el prefijo y las demás rutas a Next.js. En desarrollo, Next.js reenvía `/api/*` al backend local.
+
+El harness usa [PROJECT_SPEC.md](PROJECT_SPEC.md) para el alcance y las ecuaciones, [AGENTS.md](AGENTS.md) para las reglas de trabajo, [features.json](features.json) para el estado de aceptación y [PROGRESS.md](PROGRESS.md) para la bitácora. [scripts/check.sh](scripts/check.sh) es el sensor integral; el [Revisor](.github/agents/revisor.agent.md) audita los cambios en solo lectura.
 
 ## Ejecución local
 
-Requisitos: Python 3.12 y Node.js con npm. Desde la raíz del repositorio:
+Requisitos: Python 3.12, Node.js 20.9 o posterior, npm y Bash (Git Bash en Windows para el sensor).
 
-1. Crear el entorno virtual e instalar las dependencias de desarrollo:
-
-   ```powershell
-   cd backend
-   py -3.12 -m venv .venv
-   .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-   Copy-Item .env.example .env
-   ```
-
-   Edita `backend/.env` si deseas habilitar Gemini:
-
-   - `GEMINI_API_KEY`: clave de Gemini; si está vacía, se usa el respaldo determinista.
-   - `GEMINI_MODEL`: modelo a utilizar; por defecto, `gemini-3.5-flash-lite`.
-
-   No incluyas claves reales en el repositorio. La disponibilidad del modelo depende de la cuenta y de la API.
-
-2. Iniciar el backend desde `backend/`:
-
-   ```powershell
-   .\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
-   ```
-
-3. En otra terminal, iniciar el frontend:
-
-   ```powershell
-   cd frontend
-   npm ci
-   npm run dev
-   ```
-
-   Abre la dirección indicada por Next.js, normalmente `http://localhost:3000`. En desarrollo, las solicitudes `/api/*` se redirigen al backend en `127.0.0.1:8000`. La documentación interactiva de la API está disponible en `/api/docs`.
-
-## Verificación
+**1. Backend.** Desde la raíz, en PowerShell:
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
+
+Para habilitar Gemini, configura `GEMINI_API_KEY` en el entorno del backend antes de iniciarlo. `GEMINI_MODEL` es opcional; el valor predeterminado es `gemini-3.5-flash-lite`. Sin clave, la aplicación sigue funcionando con el respaldo determinista. En Vercel, configura las mismas variables en el proyecto. No incluyas claves en el repositorio.
+
+**2. Frontend.** En otra terminal, desde la raíz:
 
 ```powershell
 cd frontend
-npm test
-npm run lint
-npm run build
+npm ci
+npm run dev
 ```
 
-## Vercel
+Abre `http://localhost:3000` (o la dirección indicada por Next.js). La documentación de la API está disponible en `http://127.0.0.1:8000/api/docs`.
 
-Importa el repositorio como proyecto con la raíz en el directorio principal; `vercel.json` define ambos servicios y sus rutas. Configura `GEMINI_API_KEY` y, opcionalmente, `GEMINI_MODEL` como variables de entorno del proyecto. Sin clave, la API continúa funcionando con el evaluador de respaldo. Vercel Services está en fase beta; comprueba el despliegue y el límite de duración de las funciones del proyecto antes de utilizar Gemini en producción.
+**3. Verificación.** Desde la raíz:
 
-La especificación funcional y financiera se encuentra en [PROJECT_SPEC.md](PROJECT_SPEC.md).
+```bash
+bash scripts/check.sh
+```
+
+El sensor comprueba JSON y fórmulas KaTeX, ejecuta las pruebas de backend y verifica TypeScript, lint, pruebas y build de producción del frontend.
+
+## Roadmap futuro — no implementado
+
+- Inicio de sesión persistente con roles: `Administrador`, `Educador / Capacitador` y `Alumno`.
+- Emisión de certificados verificables.
+- Controles deslizantes continuos en el cockpit del simulador.
+- **Track II:** Productos Derivados, DeFi/Criptoactivos, Tokenización RWA y Securitización.

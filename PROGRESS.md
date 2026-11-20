@@ -32,3 +32,9 @@
 - Navegación y retornos actualizados, manteniendo el desbloqueo del simulador y el tutor global con contexto de inicio o currículo.
 - Sensor integral en verde: JSON y 24 fórmulas KaTeX, 143 pruebas de backend, TypeScript, lint, 5 pruebas de frontend y build de producción (`bash scripts/check.sh`). En navegador se verificaron los CTA, retornos de módulo y simulador bloqueado, apertura y cierre del tutor y ausencia de desbordes entre 320 y 1440 px.
 - `T3_LANDING_Y_CURRICULUM` pasa a `pasa`; T4 continúa pendiente.
+
+## Cierre T4 — Documentación y entrega académica
+- Actualizado `README.md` con el alcance activo, el mini plan de marketing, la guía local y de despliegue, el harness y el roadmap identificado como no implementado.
+- Creado `docs/RESUMEN_EJECUTIVO_ENTREGA.md` con los tres apartados de la entrega académica: aplicación, stack y proceso con IA, y propuesta de valor.
+- `bash scripts/check.sh` terminó en verde: seis archivos JSON, 24 fórmulas KaTeX, 143 pruebas de backend, TypeScript, lint, 5 pruebas de frontend y build de producción.
+- `T4_DOCS_Y_RESUMEN` pasa a `pasa`. Los cuatro bloques de V2 quedan validados.
