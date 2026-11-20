@@ -39,8 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </main>
           <footer className="border-t border-slate-800/80 px-4 pt-6 pb-16 text-center text-xs text-slate-500">
-            Finanzas Corporativas · Material educativo. Los cálculos del simulador son deterministas;
-            la IA explica los resultados.
+            <p>Finanzas Corporativas · Material educativo. Los cálculos del simulador son deterministas; la IA explica los resultados.</p>
+            <p className="mt-2">Referencia académica: Tecnicatura Universitaria en Gestión y Análisis de Datos en las Organizaciones (UBA).</p>
+            <p className="mt-2">Bibliografía base: Brealey, Myers &amp; Allen; Ross, Westerfield &amp; Jaffe; Berk &amp; DeMarzo; Damodaran; McKinsey (Valuation).</p>
           </footer>
           <AITutorDrawer />
         </TutorContextProvider>

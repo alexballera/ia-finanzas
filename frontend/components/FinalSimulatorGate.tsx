@@ -27,7 +27,7 @@ export function FinalSimulatorGate() {
           Se habilita al completar los 6 módulos (teoría, práctica y simulación ganada), o al
           activar el Modo Docente / Demo en la barra superior.
         </p>
-        <Link href="/" className={cn(buttonStyles.secondary, "mt-5")}>
+        <Link href="/curriculum" className={cn(buttonStyles.secondary, "mt-5")}>
           Volver al Mapa Curricular
         </Link>
       </Panel>

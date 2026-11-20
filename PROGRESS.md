@@ -26,3 +26,9 @@
 - Cerrado el hallazgo del Revisor para la Fase 2: cuando hay una tarjeta activa, el backend filtra la respuesta y las sugerencias de Gemini. Si detecta que revelan o confirman una opción de forma explícita, devuelve una pista socrática por reglas. Las pruebas incluyen «La respuesta correcta es la B» y verifican que las pistas válidas se conservan.
 - Sensores en verde: JSON y 24 fórmulas KaTeX, 93 pruebas de backend, TypeScript, lint, 5 pruebas de frontend y build de producción (`bash scripts/check.sh`). `T2_TUTOR_IA_DRAWER` permanece en `pasa`; T3 y T4 siguen pendientes.
 - El filtro de Fase 2 detecta letras mayúsculas de opción a hasta 45 caracteres de un sustantivo de respuesta dentro de la misma oración, sin listas de calificativos. También reconoce recomendaciones y letras aisladas. Los controles incluyen `D/E`, `D&A`, «Bono A» y «Proyecto A».
+
+## Cierre T3 — Landing ejecutiva y currículo
+- Nueva landing en `/` con propuesta de valor, metodología, públicos y roadmap futuro identificado como no disponible; el mapa curricular se trasladó a `/curriculum`.
+- Navegación y retornos actualizados, manteniendo el desbloqueo del simulador y el tutor global con contexto de inicio o currículo.
+- Sensor integral en verde: JSON y 24 fórmulas KaTeX, 143 pruebas de backend, TypeScript, lint, 5 pruebas de frontend y build de producción (`bash scripts/check.sh`). En navegador se verificaron los CTA, retornos de módulo y simulador bloqueado, apertura y cierre del tutor y ausencia de desbordes entre 320 y 1440 px.
+- `T3_LANDING_Y_CURRICULUM` pasa a `pasa`; T4 continúa pendiente.

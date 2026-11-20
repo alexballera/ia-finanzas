@@ -37,7 +37,8 @@ function isChatMessage(value: unknown): value is ScopedMessage {
 function contextLabel(context: TutorContext): string {
   const label = context.module_id
     ? `Módulo ${context.module_id}${context.phase ? ` · Fase ${context.phase}` : ""}`
-    : context.route === "/simulator" ? "Simulador Final" : "Mapa Curricular";
+    : context.route === "/simulator" ? "Simulador Final"
+      : context.route === "/" ? "Inicio" : "Mapa Curricular";
   const snapshot = context.simulation_snapshot;
   return snapshot
     ? `${label} · Q${snapshot.current_quarter} · WACC ${formatPercent(snapshot.wacc, 1)}`

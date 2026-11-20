@@ -474,7 +474,7 @@ function ClosingBanner({
   } else if (won && moduleId === 6 && simulatorUnlocked) {
     nextStep = { href: "/simulator", label: "Ir al Simulador Final" };
   } else {
-    nextStep = { href: "/", label: "Volver al Mapa Curricular" };
+    nextStep = { href: "/curriculum", label: "Volver al Mapa Curricular" };
   }
 
   return (

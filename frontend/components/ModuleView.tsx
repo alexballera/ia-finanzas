@@ -52,7 +52,7 @@ export function ModuleView({ courseModule }: { courseModule: CourseModule }) {
     <div className="space-y-8">
       <header>
         <Link
-          href="/"
+          href="/curriculum"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />

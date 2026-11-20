@@ -18,7 +18,7 @@ export function Navbar() {
 
   const simulatorUnlocked = isSimulatorUnlocked(state);
   const onCurriculum =
-    pathname === "/" || pathname === "/curriculum" || pathname.startsWith("/modules");
+    pathname === "/curriculum" || pathname.startsWith("/modules");
   const onSimulator = pathname.startsWith("/simulator");
 
   return (
@@ -38,7 +38,7 @@ export function Navbar() {
 
         <nav aria-label="Principal" className="flex items-center gap-1">
           <Link
-            href="/"
+            href="/curriculum"
             aria-current={onCurriculum ? "page" : undefined}
             className={cn(
               NAV_LINK,
@@ -61,7 +61,7 @@ export function Navbar() {
           ) : (
             <span
               aria-disabled="true"
-              title="Se habilita al completar los 3 módulos o al activar el Modo Docente / Demo"
+              title="Se habilita al completar los 6 módulos o al activar el Modo Docente / Demo"
               className={cn(NAV_LINK, "cursor-not-allowed text-slate-500")}
             >
               <Lock className="h-3.5 w-3.5" aria-hidden />
