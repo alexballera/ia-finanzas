@@ -50,13 +50,27 @@ _TOPICS = (
      "con su costo (WACC). Revisá que ambas tasas correspondan al mismo período."),
 )
 
+_OPTION_NOUN = r"(?:opcion|respuesta|alternativa|letra)"
+_HSPACE = r"[^\S\r\n]"
+_COPULA = rf"(?:es|seria|sera|parece|corresponde{_HSPACE}+a)"
+_CHOICE = (
+    r"(?:eleg(?:i|ir|iria)|elij(?:o|a)|elige|"
+    r"marc(?:a|o|aria)|marque|seleccion(?:a|o|e|aria)|escog(?:e|eria)|escoj(?:o|a)|"
+    r"pref(?:iero|iera|eriria)|recom(?:iendo|iende|enda|endaria)|"
+    rf"opt(?:o|a|e|aria){_HSPACE}+por|me{_HSPACE}+(?:inclina|decanta)ria{_HSPACE}+por|"
+    rf"me{_HSPACE}+quedaria{_HSPACE}+con|iria{_HSPACE}+por|apunta{_HSPACE}+a)"
+)
+_OPTION_LETTER = r"\b(?-i:[A-D])\b(?!\s*[/&])"
+_OPTION_TARGET = rf"(?:la{_HSPACE}+)?(?:{_OPTION_NOUN}{_HSPACE}+)?{_OPTION_LETTER}"
 _OPTION_DISCLOSURE = re.compile(
-    r"\b(?:"
-    r"(?:opcion|respuesta|alternativa) correcta\s*(?:es\b|:)"
-    r"|(?:elegi|elige|elegir|selecciona|marca|escoge)\s+(?:la\s+)?(?:(?:opcion|alternativa)\s+)?[a-d]\b"
-    r"|(?:la\s+)?(?:opcion|respuesta|alternativa)\s+[a-d]\s+es\s+(?:la\s+)?correcta\b"
-    r"|(?:si\s*,?\s+)?la\s+[a-d]\s+es\s+(?:la\s+)?correcta\b"
-    r")"
+    rf"\b{_OPTION_NOUN}\b[^.!?\r\n]{{0,45}}?{_OPTION_LETTER}"
+    rf"|\b{_CHOICE}{_HSPACE}+{_OPTION_TARGET}"
+    rf"|(?<!\bsi )(?<!\bno )\b{_COPULA}{_HSPACE}+{_OPTION_TARGET}"
+    rf"|^{_OPTION_TARGET}[.!]*$",
+    re.IGNORECASE,
+)
+_FINANCIAL_LABEL = re.compile(
+    rf"\b(?:(?i:bono|proyecto){_HSPACE}+[A-D]|D{_HSPACE}*[/&]{_HSPACE}*[AE])\b"
 )
 
 
@@ -67,7 +81,7 @@ class TutorAnswer(StrictModel):
 
 def _normalize_text(text: str) -> str:
     return "".join(
-        char for char in unicodedata.normalize("NFKD", text.casefold())
+        char for char in unicodedata.normalize("NFKD", text)
         if not unicodedata.combining(char)
     )
 
@@ -75,7 +89,9 @@ def _normalize_text(text: str) -> str:
 def _discloses_option(text: str) -> bool:
     plain = re.sub(r"""[*_`"'“”‘’]""", "", _normalize_text(text))
     plain = re.sub(r"[(){}\[\]]", " ", plain)
-    return _OPTION_DISCLOSURE.search(" ".join(plain.split())) is not None
+    # Enmascarar las etiquetas conserva la distancia y evita confundir la A de D&A o Bono A.
+    plain = _FINANCIAL_LABEL.sub(lambda match: "~" * len(match[0]), plain)
+    return _OPTION_DISCLOSURE.search(plain.strip()) is not None
 
 
 def _snapshot_view(snapshot: dict[str, Any] | None) -> dict[str, str] | None:
@@ -104,7 +120,7 @@ def _fallback(request: TutorChatRequest, snapshot: dict[str, str] | None) -> Tut
     card = context.active_card_question if context.phase == 2 else None
     latest = next((msg.content for msg in reversed(request.messages[-10:]) if msg.role == "user"), "")
     text = " ".join(filter(None, (card or latest, context.module_title)))
-    normalized = _normalize_text(text)
+    normalized = _normalize_text(text.casefold())
     guide = next(
         (hint for keywords, hint in _TOPICS if any(word in normalized for word in keywords)),
         "Separá los flujos de caja de los resultados contables y verificá el período de cada dato.",

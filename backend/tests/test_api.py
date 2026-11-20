@@ -152,6 +152,39 @@ def test_tutor_returns_structured_gemini_answer_with_only_last_ten_messages(gemi
     ("Elegí la **C**.", []),
     ("Sí, la opción D es correcta.", []),
     ("Separá los flujos.", ["La opción correcta es la A"]),
+    ("La correcta es B", []),
+    ("La correcta es la B", []),
+    ("La respuesta es B", []),
+    ("La respuesta es la B", []),
+    ("La alternativa correcta es C", []),
+    ("La opción D es la correcta", []),
+    ("Es la C", []),
+    ("Sería la C", []),
+    ("Corresponde a la A", []),
+    ("Marcá la D", []),
+    ("Elegí/Marcá la D", []),
+    ("Separá los flujos.", ["Es la **B**."]),
+    ("La mejor opción es B", []),
+    ("La respuesta más adecuada sería la C", []),
+    ("La alternativa más adecuada sería la C", []),
+    ("La única letra válida parece la D.", []),
+    ("La letra indicada corresponde a A.", []),
+    ("Yo elegiría la B", []),
+    ("Te recomendaría la C", []),
+    ("Me quedaría con la opción D.", []),
+    ("B", []),
+    ("La B.", []),
+    ("Opción B)", []),
+    ("Separá los flujos.", ["Iría por la alternativa C."]),
+    ("La opción más conveniente es B", []),
+    ("La opción óptima es C", []),
+    ("Optaría por la opción B", []),
+    ("Optaría por la B", []),
+    ("Opto por D.", []),
+    ("Me inclinaría por la C.", []),
+    ("Separá los flujos.", ["Me decantaría por la B."]),
+    ("Será A.", []),
+    ("La opción" + " " * 45 + "B representa la beta.", []),
 ])
 def test_tutor_replaces_explicit_answers_with_a_socratic_hint(gemini_client, reply, followups):
     generate = gemini_client.return_value.__enter__.return_value.models.generate_content
@@ -168,6 +201,37 @@ def test_tutor_replaces_explicit_answers_with_a_socratic_hint(gemini_client, rep
     assert "cupones" in body["reply"]
     assert body["reply"] != reply
     assert not set(followups).intersection(body["suggested_followups"])
+
+
+@pytest.mark.parametrize("reply", [
+    "La relación D/E es clave porque el escudo fiscal puede reducir el costo de la deuda.",
+    "La deuda D es el numerador de D/E. El flujo A del Bono A se descuenta a su tasa.",
+    "La respuesta a esto pasa por distinguir D&A del WACC.",
+    "La respuesta es D/E cuando querés expresar deuda sobre patrimonio.",
+    "Es la D & A que se suma de vuelta al flujo.",
+    "Pensá qué representa cada variable; no te voy a decir si es la B.",
+    "Te recomendaría revisar el WACC antes de comparar el Proyecto A con el Bono A.",
+    "La mejor opción sería el Proyecto A si genera valor.",
+    "La respuesta más adecuada es D/E, no D&A.",
+    "El ratio clave es D/E",
+    "La métrica es D&A",
+    "La alternativa es el Bono A.",
+    "La opción incluye un análisis.\nB representa la beta.",
+    "La opción requiere una comparación\nB representa la beta.",
+    "La opción requiere estimar el costo de capital antes de comparar B con el flujo inicial.",
+    "La opción se valora a partir del flujo de caja.",
+    "La opción" + " " * 46 + "B representa la beta.",
+])
+def test_tutor_preserves_financial_explanations_for_active_cards(gemini_client, reply):
+    followups = ["¿Cómo se relacionan D/E y WACC?"]
+    generate = gemini_client.return_value.__enter__.return_value.models.generate_content
+    generate.return_value = SimpleNamespace(parsed=TutorAnswer(
+        reply=reply, suggested_followups=followups,
+    ))
+    response = _tutor(phase=2, active_card_question="¿Cómo se valúa un bono?")
+
+    assert response.status_code == 200
+    assert response.json() == {"reply": reply, "suggested_followups": followups, "ai_source": "gemini"}
 
 
 @pytest.mark.parametrize(("phase", "question", "reply"), [
