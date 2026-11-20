@@ -10,13 +10,14 @@ import {
   Lightbulb,
   RotateCcw,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { recordPhase2Result } from "@/lib/storage";
 import type { CardDifficulty, CardType, ModuleId, Phase2Card } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { Badge, Panel, buttonStyles, type BadgeTone } from "./ui";
+import { usePublishTutorContext } from "./TutorContextProvider";
 
 interface CardOutcome {
   correct: boolean;
@@ -304,10 +305,12 @@ function Summary({
 
 export function Phase2Cards({
   moduleId,
+  moduleTitle,
   cards,
   onContinue,
 }: {
   moduleId: ModuleId;
+  moduleTitle: string;
   cards: readonly Phase2Card[];
   onContinue: () => void;
 }) {
@@ -317,6 +320,11 @@ export function Phase2Cards({
 
   const total = cards.length;
   const card = cards[index];
+  const question = finished ? undefined : card?.front_question;
+  const tutorContext = useMemo(() => ({
+    phase: 2 as const, module_id: moduleId, module_title: moduleTitle, active_card_question: question,
+  }), [moduleId, moduleTitle, question]);
+  usePublishTutorContext(tutorContext);
 
   function record(outcome: CardOutcome): Outcomes {
     const next = { ...outcomes, [card.card_id]: outcome };

@@ -145,6 +145,42 @@ export type ExecutiveVerdict = "EXCELENTE" | "ACEPTABLE" | "RIESGOSO" | "CRITICO
 
 export type AISource = "gemini" | "fallback";
 
+export interface TutorChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface TutorSimulationSnapshot {
+  scenario_id: ScenarioId;
+  current_quarter: number;
+  wacc: number;
+  roic_annualized: number;
+  eva_annualized: number;
+  cash: number;
+  interest_coverage: number;
+  credit_rating: CreditRating;
+}
+
+export interface TutorContext {
+  route: string;
+  module_id?: ModuleId;
+  module_title?: string;
+  phase?: PhaseNumber;
+  active_card_question?: string;
+  simulation_snapshot?: TutorSimulationSnapshot;
+}
+
+export interface TutorChatRequest {
+  messages: TutorChatMessage[];
+  context: TutorContext;
+}
+
+export interface TutorChatResponse {
+  reply: string;
+  suggested_followups: string[];
+  ai_source: AISource;
+}
+
 export interface ProjectCard {
   project_id: string;
   name: string;

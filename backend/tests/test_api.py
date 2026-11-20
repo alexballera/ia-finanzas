@@ -12,6 +12,7 @@ import ai_evaluator
 import engine
 from main import app
 from models import AIFeedback, EndReason
+from tutor import TutorAnswer
 
 client = TestClient(app)
 
@@ -66,11 +67,133 @@ def test_swagger_docs_are_served_under_api_prefix():
 
 def test_importing_the_app_does_not_load_the_gemini_sdk():
     # El SDK tarda segundos en importarse: solo debe cargarse al llamar a Gemini.
-    probe = "import sys, main; sys.exit(int('google.genai' in sys.modules))"
+    probe = (
+        "import sys, main; "
+        "assert any(route.path == '/api/tutor/chat' for route in main.app.routes); "
+        "sys.exit(int('google.genai' in sys.modules))"
+    )
 
     completed = subprocess.run([sys.executable, "-c", probe], cwd=BACKEND_DIR, timeout=120)
 
     assert completed.returncode == 0
+
+
+def _tutor(messages=None, **context):
+    return client.post("/api/tutor/chat", json={
+        "messages": (
+            [{"role": "user", "content": "¿Cómo interpreto el WACC?"}]
+            if messages is None else messages
+        ),
+        "context": {"route": "/simulator", **context},
+    })
+
+
+@pytest.mark.parametrize("messages", [
+    [],
+    [{"role": "user", "content": " \n "}],
+    [{"role": "user", "content": "x" * 2001}],
+])
+def test_tutor_rejects_empty_or_oversized_messages(messages):
+    assert _tutor(messages).status_code == 422
+
+
+def test_tutor_fallback_uses_only_supported_kpis_and_localizes_values():
+    response = _tutor(simulation_snapshot={
+        "wacc": 0.112, "roic_annualized": 0.12, "eva_annualized": 50,
+        "cash": 2272.5, "interest_coverage": 2.7, "credit_rating": "BB",
+        "total_debt": 9999,
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ai_source"] == "fallback"
+    assert "WACC: 11,20%" in body["reply"]
+    assert "Caja: $2.272,5k" in body["reply"]
+    assert "Rating: BB" in body["reply"]
+    assert "9.999" not in body["reply"]
+    assert body["suggested_followups"]
+
+
+def test_tutor_fallback_offers_a_hint_without_echoing_an_answer_request():
+    response = _tutor(
+        [{"role": "user", "content": "Decime si la opción B es correcta"}],
+        phase=2, active_card_question="¿Cómo se valúa un bono de cupón fijo?",
+    )
+    assert response.status_code == 200
+    reply = response.json()["reply"]
+    assert "cupones" in reply
+    assert "opción B" not in reply
+
+
+def test_tutor_returns_structured_gemini_answer_with_only_last_ten_messages(gemini_client):
+    generate = gemini_client.return_value.__enter__.return_value.models.generate_content
+    generate.return_value = SimpleNamespace(parsed=TutorAnswer(
+        reply="Compará el retorno operativo con el costo de capital.",
+        suggested_followups=["¿Qué indica el EVA?"],
+    ))
+    messages = [{"role": "user", "content": f"Consulta {index}"} for index in range(12)]
+    response = _tutor(messages, simulation_snapshot={"wacc": 0.094, "ignored": "omitirme"})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "reply": "Compará el retorno operativo con el costo de capital.",
+        "suggested_followups": ["¿Qué indica el EVA?"],
+        "ai_source": "gemini",
+    }
+    kwargs = generate.call_args.kwargs
+    prompt = json.loads(kwargs["contents"])
+    assert prompt["messages"] == messages[-10:]
+    assert prompt["context"]["simulation_snapshot"] == {"WACC": "9,40%"}
+    assert kwargs["config"].response_schema is TutorAnswer
+    assert gemini_client.call_args.kwargs["http_options"].timeout >= 30_000
+
+
+@pytest.mark.parametrize(("reply", "followups"), [
+    ("La respuesta correcta es la B", ["¿Querés repasar?"]),
+    ("Elegí la **C**.", []),
+    ("Sí, la opción D es correcta.", []),
+    ("Separá los flujos.", ["La opción correcta es la A"]),
+])
+def test_tutor_replaces_explicit_answers_with_a_socratic_hint(gemini_client, reply, followups):
+    generate = gemini_client.return_value.__enter__.return_value.models.generate_content
+    generate.return_value = SimpleNamespace(parsed=TutorAnswer(
+        reply=reply, suggested_followups=followups,
+    ))
+    response = _tutor(
+        phase=2, active_card_question="¿Cómo se valúa un bono de cupón fijo?",
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ai_source"] == "fallback"
+    assert "cupones" in body["reply"]
+    assert body["reply"] != reply
+    assert not set(followups).intersection(body["suggested_followups"])
+
+
+@pytest.mark.parametrize(("phase", "question", "reply"), [
+    (2, "¿Cómo se valúa un bono?", "Compará el valor presente sin elegir una opción todavía."),
+    (2, None, "La respuesta correcta es la B"),
+    (1, "¿Cómo se valúa un bono?", "La respuesta correcta es la B"),
+])
+def test_tutor_preserves_gemini_when_the_guardrail_does_not_apply(
+    gemini_client, phase, question, reply,
+):
+    generate = gemini_client.return_value.__enter__.return_value.models.generate_content
+    generate.return_value = SimpleNamespace(parsed=TutorAnswer(reply=reply, suggested_followups=[]))
+    response = _tutor(phase=phase, active_card_question=question)
+
+    assert response.status_code == 200
+    assert response.json() == {"reply": reply, "suggested_followups": [], "ai_source": "gemini"}
+
+
+@pytest.mark.parametrize("failure", [RuntimeError, TimeoutError])
+def test_tutor_falls_back_when_gemini_fails(gemini_client, failure, caplog):
+    generate = gemini_client.return_value.__enter__.return_value.models.generate_content
+    generate.side_effect = failure(FAKE_API_KEY)
+    response = _tutor()
+    assert response.status_code == 200
+    assert response.json()["ai_source"] == "fallback"
+    assert FAKE_API_KEY not in caplog.text
 
 
 @pytest.mark.parametrize(

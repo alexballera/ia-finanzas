@@ -18,3 +18,10 @@
 - El revisor detectó un posible escudo fiscal por EBIT negativo en la valuación ex ante; se aplicó el mismo piso de impuestos operativos que usa el motor y se agregó un test de regresión.
 - Sensores en verde: JSON y 24 fórmulas KaTeX, 78 pruebas de backend, TypeScript, lint, 5 tests frontend y build de producción (`bash scripts/check.sh`).
 - `T1_MODULOS_4_5_6` pasa a estado `pasa`. T2, T3 y T4 continúan pendientes.
+
+## Cierre T2 — Tutor CFO IA contextual
+- `POST /api/tutor/chat` usa Gemini con salida estructurada, carga diferida y timeout de 30 segundos. Si no está disponible, responde con orientación pedagógica por reglas.
+- El drawer global recibe el módulo, la fase y la pregunta activa sin su respuesta correcta, o los KPIs vigentes del simulador. Gemini los interpreta; el motor Python sigue siendo el único que calcula.
+- La conversación se conserva en `sessionStorage` por pestaña. A partir de la revisión, las consultas solo reenvían mensajes del contexto activo; el historial completo sigue visible y se puede limpiar.
+- Cerrado el hallazgo del Revisor para la Fase 2: cuando hay una tarjeta activa, el backend filtra la respuesta y las sugerencias de Gemini. Si detecta que revelan o confirman una opción de forma explícita, devuelve una pista socrática por reglas. Las pruebas incluyen «La respuesta correcta es la B» y verifican que las pistas válidas se conservan.
+- Sensores en verde: JSON y 24 fórmulas KaTeX, 93 pruebas de backend, TypeScript, lint, 5 pruebas de frontend y build de producción (`bash scripts/check.sh`). `T2_TUTOR_IA_DRAWER` permanece en `pasa`; T3 y T4 siguen pendientes.

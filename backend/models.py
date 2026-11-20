@@ -7,9 +7,9 @@ y las tasas y métricas de retorno están anualizadas.
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 ExecutiveVerdict = Literal["EXCELENTE", "ACEPTABLE", "RIESGOSO", "CRITICO"]
 AISource = Literal["gemini", "fallback"]
@@ -17,6 +17,31 @@ AISource = Literal["gemini", "fallback"]
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class TutorChatMessage(StrictModel):
+    role: Literal["user", "assistant"]
+    content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
+
+
+class TutorContext(StrictModel):
+    route: str
+    module_id: int | None = None
+    module_title: str | None = None
+    phase: Literal[1, 2, 3] | None = None
+    active_card_question: str | None = None
+    simulation_snapshot: dict[str, Any] | None = None
+
+
+class TutorChatRequest(StrictModel):
+    messages: list[TutorChatMessage] = Field(min_length=1)
+    context: TutorContext
+
+
+class TutorChatResponse(StrictModel):
+    reply: str
+    suggested_followups: list[str]
+    ai_source: AISource
 
 
 class ScenarioId(StrEnum):

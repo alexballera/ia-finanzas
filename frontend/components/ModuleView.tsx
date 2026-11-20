@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   isModuleUnlocked,
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Phase1Theory } from "./Phase1Theory";
 import { Phase2Cards } from "./Phase2Cards";
 import { CFOSimulator } from "./simulator/CFOSimulator";
+import { usePublishTutorContext } from "./TutorContextProvider";
 import { Badge, Panel, buttonStyles } from "./ui";
 
 const PHASES: readonly { phase: PhaseNumber; title: string; subtitle: string }[] = [
@@ -41,6 +42,11 @@ export function ModuleView({ courseModule }: { courseModule: CourseModule }) {
   const state = useAppState();
   const hydrated = useHydrated();
   const moduleId = courseModule.module_id;
+  const unlocked = hydrated && isModuleUnlocked(state, moduleId);
+  const tutorContext = useMemo(() => unlocked ? null : ({
+    module_id: moduleId, module_title: courseModule.title,
+  }), [unlocked, moduleId, courseModule.title]);
+  usePublishTutorContext(tutorContext);
 
   return (
     <div className="space-y-8">
@@ -67,7 +73,7 @@ export function ModuleView({ courseModule }: { courseModule: CourseModule }) {
           <div className="h-20 animate-pulse rounded-2xl bg-slate-900" />
           <div className="h-64 animate-pulse rounded-2xl bg-slate-900" />
         </div>
-      ) : !isModuleUnlocked(state, moduleId) ? (
+      ) : !unlocked ? (
         <Panel className="text-center">
           <Lock className="mx-auto h-8 w-8 text-slate-500" aria-hidden />
           <h2 className="mt-4 text-lg font-semibold text-white">Módulo bloqueado</h2>
@@ -95,6 +101,10 @@ function ModulePhases({ courseModule, state }: { courseModule: CourseModule; sta
   );
   // Si el progreso se reinicia, la fase elegida puede quedar bloqueada.
   const activePhase = isPhaseUnlocked(state, moduleId, selectedPhase) ? selectedPhase : 1;
+  const tutorContext = useMemo(() => activePhase === 1 ? {
+    phase: activePhase, module_id: moduleId, module_title: courseModule.title,
+  } : null, [activePhase, moduleId, courseModule.title]);
+  usePublishTutorContext(tutorContext);
 
   function goToPhase(phase: PhaseNumber) {
     setSelectedPhase(phase);
@@ -173,6 +183,7 @@ function ModulePhases({ courseModule, state }: { courseModule: CourseModule; sta
         {activePhase === 2 && (
           <Phase2Cards
             moduleId={moduleId}
+            moduleTitle={courseModule.title}
             cards={courseModule.phase_2_cards}
             onContinue={() => goToPhase(3)}
           />
@@ -182,6 +193,7 @@ function ModulePhases({ courseModule, state }: { courseModule: CourseModule; sta
           <CFOSimulator
             scenarioId={courseModule.phase_3_brief.scenario_id}
             moduleId={courseModule.module_id}
+            moduleTitle={courseModule.title}
           />
         )}
       </div>

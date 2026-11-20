@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException
 
 import ai_evaluator
 import engine
+from tutor import chat_with_tutor
 from models import (
     AIFeedback,
     DividendPreviewRequest,
@@ -18,6 +19,8 @@ from models import (
     InitSimulationRequest,
     SimulationStepResponse,
     StepSimulationRequest,
+    TutorChatRequest,
+    TutorChatResponse,
 )
 
 API_VERSION = "0.2.0"
@@ -91,3 +94,8 @@ def preview_simulation(request: DividendPreviewRequest) -> DividendPreviewRespon
         projected_cash_before_dividends=result.state.balance_sheet.cash,
         projected_interest_coverage=result.state.valuation_and_risk_kpis.interest_coverage,
     )
+
+
+@app.post("/api/tutor/chat", response_model=TutorChatResponse)
+def tutor_chat(request: TutorChatRequest) -> TutorChatResponse:
+    return chat_with_tutor(request)

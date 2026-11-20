@@ -10,6 +10,8 @@ import type {
   ScenarioId,
   SimulationStepResponse,
   StepSimulationRequest,
+  TutorChatRequest,
+  TutorChatResponse,
 } from "./types";
 import { isRecord, isSimulationStepResponse } from "./validation";
 
@@ -47,6 +49,7 @@ function readDetail(body: unknown): string | null {
 }
 
 async function postJson(path: string, payload: unknown): Promise<unknown> {
+  const service = path.startsWith("/api/tutor/") ? "tutor" : "servidor de simulación";
   let response: Response;
   try {
     response = await fetch(path, {
@@ -59,8 +62,8 @@ async function postJson(path: string, payload: unknown): Promise<unknown> {
     const timedOut = error instanceof DOMException && error.name === "TimeoutError";
     throw new ApiError(
       timedOut
-        ? "El servidor de simulación tardó demasiado en responder. Conviene reintentar."
-        : "No se pudo conectar con el servidor de simulación. Verificar que el backend esté en ejecución.",
+        ? `El ${service} tardó demasiado en responder. Conviene reintentar.`
+        : `No se pudo conectar con el ${service}. Verificar que el backend esté en ejecución.`,
       null,
     );
   }
@@ -68,7 +71,7 @@ async function postJson(path: string, payload: unknown): Promise<unknown> {
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     throw new ApiError(
-      readDetail(body) ?? `El servidor de simulación respondió con un error (HTTP ${response.status}).`,
+      readDetail(body) ?? `El ${service} respondió con un error (HTTP ${response.status}).`,
       response.status,
     );
   }
@@ -89,6 +92,24 @@ export function initSimulation(scenarioId: ScenarioId): Promise<SimulationStepRe
 
 export function stepSimulation(payload: StepSimulationRequest): Promise<SimulationStepResponse> {
   return postSimulation("/api/simulation/step", payload);
+}
+
+export async function sendTutorMessage(payload: TutorChatRequest): Promise<TutorChatResponse> {
+  const body = await postJson("/api/tutor/chat", payload);
+  if (
+    !isRecord(body) ||
+    typeof body.reply !== "string" ||
+    !Array.isArray(body.suggested_followups) ||
+    !body.suggested_followups.every((item) => typeof item === "string") ||
+    (body.ai_source !== "gemini" && body.ai_source !== "fallback")
+  ) {
+    throw new ApiError("El tutor devolvió una respuesta inesperada.", null);
+  }
+  return {
+    reply: body.reply,
+    suggested_followups: body.suggested_followups,
+    ai_source: body.ai_source,
+  };
 }
 
 export async function previewDividends(

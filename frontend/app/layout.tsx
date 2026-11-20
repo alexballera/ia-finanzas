@@ -4,6 +4,8 @@ import "katex/dist/katex.min.css";
 import "./globals.css";
 
 import { Navbar } from "@/components/Navbar";
+import { AITutorDrawer } from "@/components/AITutorDrawer";
+import { TutorContextProvider } from "@/components/TutorContextProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,14 +33,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <Navbar />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
-          {children}
-        </main>
-        <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
-          Finanzas Corporativas · Material educativo. Los cálculos del simulador son deterministas;
-          la IA solo redacta el feedback.
-        </footer>
+        <TutorContextProvider>
+          <Navbar />
+          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+            {children}
+          </main>
+          <footer className="border-t border-slate-800/80 px-4 pt-6 pb-16 text-center text-xs text-slate-500">
+            Finanzas Corporativas · Material educativo. Los cálculos del simulador son deterministas;
+            la IA explica los resultados.
+          </footer>
+          <AITutorDrawer />
+        </TutorContextProvider>
       </body>
     </html>
   );

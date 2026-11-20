@@ -13,7 +13,7 @@ import {
   Trophy,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { describeApiError, initSimulation, stepSimulation } from "@/lib/api";
 import { exportHistoryToCsv } from "@/lib/csvExport";
@@ -35,6 +35,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 import { Badge, Panel, buttonStyles } from "../ui";
+import { usePublishTutorContext } from "../TutorContextProvider";
 import { AIFeedbackCard } from "./AIFeedbackCard";
 import { DecisionPanel } from "./DecisionPanel";
 import { FclWaterfallChart } from "./FclWaterfallChart";
@@ -66,15 +67,36 @@ interface CFOSimulatorProps {
   scenarioId: ScenarioId;
   /** Módulo al que pertenece el caso; sin valor en el simulador final. */
   moduleId?: ModuleId;
+  moduleTitle?: string;
   /** Se invoca cuando un turno deja ganada la simulación del módulo. */
   onModuleWon?: () => void;
 }
 
-export function CFOSimulator({ scenarioId, moduleId, onModuleWon }: CFOSimulatorProps) {
+export function CFOSimulator({ scenarioId, moduleId, moduleTitle, onModuleWon }: CFOSimulatorProps) {
   const appState = useAppState();
   const hydrated = useHydrated();
   const saved = appState.simulations[scenarioId];
   const hasSaved = saved !== undefined;
+  const tutorState = saved?.response.state;
+  const tutorContext = useMemo(() => {
+    const kpis = tutorState?.valuation_and_risk_kpis;
+    return {
+      phase: moduleId === undefined ? undefined : (3 as const),
+      module_id: moduleId,
+      module_title: moduleTitle,
+      simulation_snapshot: tutorState && kpis ? {
+        scenario_id: scenarioId,
+        current_quarter: tutorState.meta.current_quarter,
+        wacc: kpis.wacc,
+        roic_annualized: kpis.roic_annualized,
+        eva_annualized: kpis.eva_annualized,
+        cash: tutorState.balance_sheet.cash,
+        interest_coverage: kpis.interest_coverage,
+        credit_rating: kpis.credit_rating,
+      } : undefined,
+    };
+  }, [moduleId, moduleTitle, scenarioId, tutorState]);
+  usePublishTutorContext(tutorContext);
 
   const [initError, setInitError] = useState<string | null>(null);
   const [initAttempt, setInitAttempt] = useState(0);
