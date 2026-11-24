@@ -37,12 +37,32 @@ El entorno de desarrollo asistido por IA se organizó mediante [PROJECT_SPEC.md]
 
 ## Ejecución local
 
-Requisitos: Python 3.12, Node.js 20.9 o superior, npm y Bash (Git Bash en Windows para ejecutar el sensor).
+Requisitos: Python 3.12, Node.js 20.9 o posterior, npm y Bash (Git Bash en Windows para ejecutar el sensor).
 
 **1. Backend.** Desde la raíz, en PowerShell:
 
-```powershell
-cd backend
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
+    cd backend
+    py -3.12 -m venv .venv
+    .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+    .\.venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000
+
+Para habilitar Gemini, configure `GEMINI_API_KEY` en el entorno del backend antes de iniciarlo. `GEMINI_MODEL` es opcional (por defecto `gemini-3.5-flash-lite`). Sin clave, la aplicación sigue operando con el respaldo determinista. En Vercel, defina estas mismas variables en el proyecto y nunca versione archivos `.env`.
+
+**2. Frontend.** En otra terminal, desde la raíz:
+
+    cd frontend
+    npm ci
+    npm run dev
+
+Abra `http://localhost:3000`. La documentación interactiva de la API está disponible en `http://127.0.0.1:8000/api/docs`.
+
+**3. Verificación integral.** Desde la raíz (Git Bash / Bash):
+
+    bash scripts/check.sh
+
+## Roadmap futuro (no implementado en esta versión)
+
+- Inicio de sesión persistente con gestión de roles: `Administrador`, `Educador / Capacitador` y `Alumno`.
+- Emisión de certificados verificables de finalización.
+- Controles deslizantes continuos (*sliders*) en el tablero del CFO.
+- **Track II:** Productos Derivados, Finanzas Descentralizadas (DeFi) y Criptoactivos, Tokenización de activos (RWA) y Securitización.
