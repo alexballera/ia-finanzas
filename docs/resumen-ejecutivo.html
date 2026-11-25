@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resumen Ejecutivo — Finanzas Corporativas · Simulador CFO</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 14mm 16mm;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      font-size: 9.7pt;
+      line-height: 1.42;
+      margin: 0;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 14mm 16mm;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+    }
+    header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 14.5pt;
+      margin: 0 0 3px 0;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+    .meta {
+      font-size: 8.8pt;
+      color: #475569;
+      margin: 0;
+    }
+    h2 {
+      font-size: 10.6pt;
+      color: #1e3a8a;
+      margin: 11px 0 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    p {
+      margin: 0 0 7px 0;
+      text-align: justify;
+    }
+    .links-box {
+      background: #f1f5f9;
+      border-left: 3px solid #1e3a8a;
+      padding: 6px 10px;
+      margin: 6px 0 8px 0;
+      font-size: 9pt;
+    }
+    a {
+      color: #1d4ed8;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.6pt;
+      background: #f1f5f9;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .page {
+        box-shadow: none;
+        padding: 0;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Finanzas Corporativas · Simulador CFO</h1>
+      <p class="meta">
+        Tecnicatura Universitaria en Gestión y Análisis de Datos en las Organizaciones (UBA) · Entrega de Trabajo Práctico
+      </p>
+    </header>
+
+    <h2>1. Aplicación funcional</h2>
+    <div class="links-box">
+      <strong>Aplicación en vivo:</strong> <a href="https://ia-finanzas-psi.vercel.app/">https://ia-finanzas-psi.vercel.app/</a><br />
+      <strong>Repositorio GitHub:</strong> <a href="https://github.com/alexballera/ia-finanzas">https://github.com/alexballera/ia-finanzas</a>
+    </div>
+    <p>
+      Desde la landing inicial hacia el mapa curricular (<code>/curriculum</code>), la aplicación ofrece seis módulos progresivos de tres fases cada uno: teoría condensada con fórmulas en LaTeX, práctica con 48 tarjetas interactivas y casos CFO de tres trimestres, acompañados por un <strong>Tutor CFO IA</strong> en panel lateral contextual. El recorrido culmina en <strong>Cashflow Corporativo</strong> (<code>/simulator</code>), un simulador de hasta 12 trimestres donde se deciden inversiones, financiamiento y dividendos observando su efecto en el gráfico Waterfall del flujo de caja libre (FCFF), la curva ROIC vs. WACC y el historial exportable a CSV. La barra superior incluye un interruptor de <strong>Modo Docente / Demo</strong> para explorar todo libremente.
+    </p>
+
+    <h2>2. Stack y proceso de desarrollo con IA</h2>
+    <p>
+      El frontend está construido con Next.js, TypeScript, Tailwind CSS, KaTeX y Recharts, guardando el progreso en el navegador (<code>localStorage</code> y <code>sessionStorage</code>) para evitar una base de datos compleja. El backend corre en Python con FastAPI, <code>numpy</code> y <code>numpy-financial</code>, desplegado junto al frontend en Vercel Services. Para los diagnósticos del directorio y el tutor lateral integré Gemini (<code>gemini-3.5-flash-lite</code>) mediante <code>google-genai</code> con Structured Outputs.
+    </p>
+    <p>
+      Trabajé con roles diferenciados de IA: comencé explorando ideas con Gemini y luego usé Google AI Studio como apoyo de arquitectura, donde acoté el MVP, definí las ecuaciones contables en <code>PROJECT_SPEC.md</code> y generé y audité los seis JSON curriculares (<code>module_1.json</code> a <code>module_6.json</code>). Delegué la programación por sprints en VS Code a <strong>GitHub Copilot Agent</strong> bajo un harness explícito: <code>AGENTS.md</code> (reglas breves), <code>features.json</code> y <code>PROGRESS.md</code> (memoria entre sesiones) y <code>scripts/check.sh</code> como sensor determinista único (JSON/KaTeX, pruebas Python y TypeScript, lint y build). Al cierre de cada bloque, el subagente de solo lectura <code>.github/agents/revisor.agent.md</code> auditó los cambios en contexto limpio mediante <code>#changes</code> antes de cada commit.
+    </p>
+    <p>
+      Entre los desafíos resueltos con IA destacan: separar el cálculo contable en Python del análisis en Gemini (con respaldo por reglas) para evitar alucinaciones numéricas; aplicar importación diferida de <code>google-genai</code> y ampliar <code>proxyTimeout</code> ante cortes de 30 s en el proxy local; detectar automáticamente un <code>module_2.json</code> truncado y un escape faltante en KaTeX (<code>D&amp;A</code>); y corregir dos hallazgos reales del subagente Revisor cubiertos con pruebas de regresión: un beneficio fiscal erróneo con EBIT negativo en <code>engine.py</code> y un filtro estructural en <code>tutor.py</code> para no revelar respuestas en Fase 2.
+    </p>
+
+    <h2>3. Propuesta de valor del producto</h2>
+    <p>
+      La plataforma cierra la brecha entre memorizar fórmulas aisladas y tomar decisiones financieras integradas bajo incertidumbre, mostrando cómo cada elección impacta en la liquidez, el riesgo (WACC) y la creación de valor (EVA). Está dirigida a estudiantes de grado, posgrado, MBA y análisis de datos (B2C), así como a la capacitación de equipos de Finanzas, gerentes no financieros, PyMEs y empresas familiares (B2B).
+    </p>
+    <p>
+      Combina beneficios racionales —rigor bibliográfico estándar (Brealey-Myers, Ross-Westerfield, Berk-DeMarzo, Damodaran y McKinsey), cálculos reproducibles, exportación analítica en CSV y una futura certificación verificable en hoja de ruta— con beneficios emocionales positivos orientados al logro y al reconocimiento profesional: ganar confianza técnica para consolidarse como referente financiero estratégico en la empresa. Frente a planillas estáticas de Excel o chatbots genéricos que inventan cifras, ofrece escenarios dinámicos multi-trimestre, precisión contable y tutoría contextual.
+    </p>
+  </div>
+</body>
+</html>
